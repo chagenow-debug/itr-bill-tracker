@@ -163,7 +163,8 @@ export default function ImportPage() {
             bill_number,companion_bills,chamber,title,short_title,description,committee,committee_key,status,position,sponsor,subcommittee,fiscal_note,lsb,url,notes
           </p>
           <div className="text-sm text-blue-800">
-            <p className="mb-2"><strong>Required fields:</strong> bill_number, chamber, title, short_title, position</p>
+            <p className="mb-2"><strong>Required fields:</strong> bill_number, chamber, title, position</p>
+            <p className="mb-2"><strong>Optional fields:</strong> short_title (auto-generated if omitted), status, sponsor, committee, description, etc.</p>
             <p className="mb-2"><strong>Position values:</strong> Support, Against, Monitor, Undecided</p>
             <p><strong>Chambers:</strong> House, Senate</p>
           </div>
@@ -260,9 +261,9 @@ export default function ImportPage() {
         <div className="bg-white p-6 rounded shadow mt-8">
           <h2 className="font-semibold text-gray-900 mb-3">Sample CSV Format</h2>
           <pre className="bg-gray-50 p-4 rounded text-sm overflow-x-auto text-gray-700">
-{`bill_number,chamber,title,short_title,position
-HF 123,House,An Act relating to tax relief,Income Tax Cut,Support
-SF 456,Senate,An Act relating to education funding,Education Bill,Monitor`}
+{`bill_number,chamber,title,position
+HF 123,House,An Act relating to tax relief,Support
+SF 456,Senate,An Act relating to education funding,Monitor`}
           </pre>
         </div>
       </div>

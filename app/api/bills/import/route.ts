@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
       });
 
       // Validate required fields
-      if (!row.bill_number || !row.chamber || !row.title || !row.short_title || !row.position) {
-        errors.push(`Row ${i + 1}: Missing required fields (bill_number, chamber, title, short_title, position)`);
+      if (!row.bill_number || !row.chamber || !row.title || !row.position) {
+        errors.push(`Row ${i + 1}: Missing required fields (bill_number, chamber, title, position)`);
         continue;
       }
 
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         companion_bills: row.companion_bills || undefined,
         chamber: row.chamber,
         title: row.title,
-        short_title: row.short_title,
+        short_title: row.short_title || row.title.substring(0, 50),
         description: row.description || undefined,
         committee: row.committee || undefined,
         committee_key: row.committee_key || undefined,
