@@ -55,13 +55,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+    // Detect delimiter - try comma first, then tab, then multiple spaces
+    let delimiter = ",";
+    if (!lines[0].includes(",") && lines[0].includes("\t")) {
+      delimiter = "\t";
+    } else if (!lines[0].includes(",") && !lines[0].includes("\t")) {
+      // Try to detect multiple spaces as delimiter
+      delimiter = /\s{2,}/;
+    }
+
+    const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase());
 
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(",").map(v => v.trim());
+      const values = lines[i].split(delimiter).map(v => v.trim());
 
-      if (values.length !== headers.length) {
-        errors.push(`Row ${i + 1}: Column count mismatch`);
+      // Allow some flexibility in column count (at least required fields)
+      if (values.length < 4) {
+        errors.push(`Row ${i + 1}: Not enough columns (need at least bill_number, chamber, title, position)`);
         continue;
       }
 
