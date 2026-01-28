@@ -42,15 +42,19 @@ export default function AdminPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check if user is authenticated
-        const authResponse = await fetch("/api/auth/check");
+        // Check if user is authenticated (include credentials for cookies)
+        const authResponse = await fetch("/api/auth/check", {
+          credentials: "include",
+        });
         if (authResponse.status === 401) {
           router.push("/admin/login");
           return;
         }
 
         // Fetch bills if authenticated
-        const billsResponse = await fetch("/api/bills");
+        const billsResponse = await fetch("/api/bills", {
+          credentials: "include",
+        });
         if (!billsResponse.ok) throw new Error("Failed to fetch bills");
         const data = await billsResponse.json();
         setBills(data);
