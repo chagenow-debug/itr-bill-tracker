@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Detect delimiter - try comma first, then tab, then multiple spaces
-    let delimiter = ",";
+    let delimiter: string | RegExp = ",";
     if (!lines[0].includes(",") && lines[0].includes("\t")) {
       delimiter = "\t";
     } else if (!lines[0].includes(",") && !lines[0].includes("\t")) {
@@ -64,10 +64,10 @@ export async function POST(request: NextRequest) {
       delimiter = /\s{2,}/;
     }
 
-    const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase());
+    const headers = lines[0].split(delimiter as any).map(h => h.trim().toLowerCase());
 
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(delimiter).map(v => v.trim());
+      const values = lines[i].split(delimiter as any).map(v => v.trim());
 
       // Allow some flexibility in column count (at least required fields)
       if (values.length < 4) {
