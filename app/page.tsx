@@ -25,16 +25,26 @@ export default function Home() {
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("All");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBills = async () => {
       try {
         const response = await fetch("/api/bills");
-        if (!response.ok) throw new Error("Failed to fetch bills");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch bills: ${response.status}`);
+        }
         const data = await response.json();
-        setBills(data);
-      } catch (error) {
-        console.error("Error fetching bills:", error);
+        if (Array.isArray(data)) {
+          setBills(data);
+        } else {
+          setBills([]);
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+        console.error("Error fetching bills:", errorMessage);
+        setError(errorMessage);
+        setBills([]);
       } finally {
         setLoading(false);
       }
@@ -72,6 +82,14 @@ export default function Home() {
             Admin Panel
           </a>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded">
+            <p className="text-red-700">Error: {error}</p>
+            <p className="text-sm text-red-600 mt-2">Unable to load bills. Please try refreshing the page.</p>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4 mb-8">
