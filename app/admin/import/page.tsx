@@ -97,10 +97,11 @@ export default function ImportPage() {
             <input
               id="file"
               type="file"
-              accept=".csv"
+              accept=".csv,.pdf,application/pdf"
               onChange={handleFileChange}
               className="block w-full text-sm text-gray-500 file:px-4 file:py-2 file:bg-blue-50 file:text-blue-600 file:border-0 file:rounded hover:file:bg-blue-100"
             />
+            <p className="text-xs text-gray-500 mt-2">Note: CSV format recommended. If PDF files appear greyed out, select &quot;All Files&quot; from the file picker dropdown.</p>
             {file && (
               <p className="text-sm text-gray-600 mt-2">Selected: {file.name}</p>
             )}
