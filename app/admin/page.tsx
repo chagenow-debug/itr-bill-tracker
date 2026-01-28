@@ -16,8 +16,6 @@ interface Bill {
 
 export default function AdminPage() {
   const [bills, setBills] = useState<Bill[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
@@ -55,12 +53,9 @@ export default function AdminPage() {
         if (!billsResponse.ok) throw new Error("Failed to fetch bills");
         const data = await billsResponse.json();
         setBills(data);
-        setAuthenticated(true);
       } catch (error) {
         console.error("Error loading admin:", error);
         // Don't redirect, let the page show an error or load without auth
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -151,10 +146,6 @@ export default function AdminPage() {
       alert("Error deleting bill");
     }
   };
-
-  if (loading) {
-    return <div className="p-8 text-center">Loading...</div>;
-  }
 
   return (
     <main className="min-h-screen bg-gray-50">
