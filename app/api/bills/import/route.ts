@@ -79,17 +79,18 @@ export async function POST(request: NextRequest) {
         row[key] = typeof rawRow[key] === "string" ? rawRow[key].trim() : rawRow[key];
       });
 
-      // Validate required bill_number and position
-      if (!row.bill_number || !row.position) {
-        errors.push(`Row ${i + 1}: Missing required fields (bill_number, position)`);
+      // Validate required bill_number
+      if (!row.bill_number) {
+        errors.push(`Row ${i + 1}: Missing required field (bill_number)`);
         continue;
       }
 
       // Auto-derive chamber from bill_number if not provided
       if (!row.chamber) {
-        const billMatch = row.bill_number.match(/^(HF|SF|HJ|SJ)/i);
+        // Match HF, HSB, HJ (House) or SF, SSB, SJ (Senate)
+        const billMatch = row.bill_number.match(/^([HS])/i);
         if (billMatch) {
-          row.chamber = billMatch[1].toUpperCase().startsWith('H') ? 'House' : 'Senate';
+          row.chamber = billMatch[1].toUpperCase() === 'H' ? 'House' : 'Senate';
         } else {
           row.chamber = 'Unknown';
         }
@@ -100,10 +101,14 @@ export async function POST(request: NextRequest) {
         row.title = row.short_title || row.bill_number;
       }
 
-      // Validate position enum
-      if (!["Support", "Against", "Monitor", "Undecided"].includes(row.position)) {
-        errors.push(`Row ${i + 1}: Invalid position value. Must be: Support, Against, Monitor, or Undecided`);
-        continue;
+      // Map position value to valid enum, or default to Monitor
+      const validPositions = ["Support", "Against", "Monitor", "Undecided"];
+      if (!row.position || !validPositions.includes(row.position)) {
+        // Store the original status in the notes field if position is non-standard
+        if (row.position && !validPositions.includes(row.position)) {
+          row.notes = `Status: ${row.position}${row.notes ? ' | ' + row.notes : ''}`;
+        }
+        row.position = "Monitor"; // Default to Monitor for unspecified positions
       }
 
       bills.push({
