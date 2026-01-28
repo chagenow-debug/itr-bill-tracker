@@ -135,7 +135,7 @@ export default function ImportPage() {
               </p>
             </div>
 
-            {result.imported.length > 0 && (
+            {result.imported && result.imported.length > 0 && (
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-900 mb-3">Imported Bills ({result.imported.length})</h3>
                 <div className="space-y-2">
