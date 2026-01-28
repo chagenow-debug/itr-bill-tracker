@@ -79,10 +79,25 @@ export async function POST(request: NextRequest) {
         row[key] = typeof rawRow[key] === "string" ? rawRow[key].trim() : rawRow[key];
       });
 
-      // Validate required fields
-      if (!row.bill_number || !row.chamber || !row.title || !row.position) {
-        errors.push(`Row ${i + 1}: Missing required fields (bill_number, chamber, title, position)`);
+      // Validate required bill_number and position
+      if (!row.bill_number || !row.position) {
+        errors.push(`Row ${i + 1}: Missing required fields (bill_number, position)`);
         continue;
+      }
+
+      // Auto-derive chamber from bill_number if not provided
+      if (!row.chamber) {
+        const billMatch = row.bill_number.match(/^(HF|SF|HJ|SJ)/i);
+        if (billMatch) {
+          row.chamber = billMatch[1].toUpperCase().startsWith('H') ? 'House' : 'Senate';
+        } else {
+          row.chamber = 'Unknown';
+        }
+      }
+
+      // Use short_title as title if title is empty
+      if (!row.title) {
+        row.title = row.short_title || row.bill_number;
       }
 
       // Validate position enum
