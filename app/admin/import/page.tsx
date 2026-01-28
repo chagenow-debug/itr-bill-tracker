@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import * as pdfjsLib from "pdfjs-dist";
+import dynamic from "next/dynamic";
 
 interface ImportResult {
   message: string;
@@ -10,9 +10,6 @@ interface ImportResult {
   errors: string[];
   skipped: number;
 }
-
-// Set up worker for pdfjs
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 export default function ImportPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -41,6 +38,12 @@ export default function ImportPage() {
   };
 
   const extractPdfText = async (pdfFile: File): Promise<string> => {
+    // Dynamically import pdfjs only when needed
+    const pdfjsLib = await import("pdfjs-dist");
+
+    // Set up worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
     const arrayBuffer = await pdfFile.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     let extractedText = "";
