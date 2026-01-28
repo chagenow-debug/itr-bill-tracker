@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import * as pdfjsLib from "pdfjs-dist";
 
 interface ImportResult {
   message: string;
@@ -10,8 +11,12 @@ interface ImportResult {
   skipped: number;
 }
 
+// Set up worker for pdfjs
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
 export default function ImportPage() {
   const [file, setFile] = useState<File | null>(null);
+  const [fileType, setFileType] = useState<"csv" | "pdf" | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState("");
@@ -19,9 +24,37 @@ export default function ImportPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
       setError("");
+
+      // Detect file type
+      if (selectedFile.name.endsWith(".csv")) {
+        setFileType("csv");
+      } else if (selectedFile.name.endsWith(".pdf")) {
+        setFileType("pdf");
+      } else {
+        setError("Please select a CSV or PDF file");
+        setFileType(null);
+      }
     }
+  };
+
+  const extractPdfText = async (pdfFile: File): Promise<string> => {
+    const arrayBuffer = await pdfFile.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let extractedText = "";
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(" ");
+      extractedText += pageText + "\n";
+    }
+
+    return extractedText;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,17 +64,64 @@ export default function ImportPage() {
       return;
     }
 
+    if (!fileType) {
+      setError("Unable to determine file type");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setResult(null);
 
     try {
+      let csvContent = "";
+
+      // If PDF, extract text first
+      if (fileType === "pdf") {
+        const pdfText = await extractPdfText(file);
+        // Parse PDF text into CSV-like format
+        // Expected format: lines with bill data separated by pipes or tabs
+        const lines = pdfText.split("\n").filter(line => line.trim());
+
+        csvContent = "bill_number,chamber,title,short_title,position\n";
+
+        for (const line of lines) {
+          // Look for bill entries (HF/SF followed by number)
+          const match = line.match(/^(HF|SF|HJ|SJ)\s+(\d+)/i);
+          if (match) {
+            // Extract bill data from line
+            const parts = line.split(/[|,\t]/).map(p => p.trim());
+            if (parts.length >= 4) {
+              const billNumber = parts[0];
+              const title = parts[1] || "Unknown";
+              const shortTitle = parts[2] || title.substring(0, 50);
+              const position = parts[3] || "Undecided";
+              const chamber = billNumber.startsWith("HF") || billNumber.startsWith("HJ") ? "House" : "Senate";
+
+              csvContent += `${billNumber},${chamber},"${title}","${shortTitle}",${position}\n`;
+            }
+          }
+        }
+
+        if (!csvContent.includes("\n") || csvContent.split("\n").length < 2) {
+          setError("Could not extract bill data from PDF. Please check the PDF format.");
+          setLoading(false);
+          return;
+        }
+      } else {
+        // CSV file - read as text
+        csvContent = await file.text();
+      }
+
+      // Send CSV content to import endpoint
       const formData = new FormData();
-      formData.append("file", file);
+      const csvBlob = new Blob([csvContent], { type: "text/csv" });
+      formData.append("file", csvBlob, "import.csv");
 
       const response = await fetch("/api/bills/import", {
         method: "POST",
         body: formData,
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -55,7 +135,8 @@ export default function ImportPage() {
       setResult(data);
       setFile(null);
     } catch (err) {
-      setError("An error occurred during import");
+      console.error("Import error:", err);
+      setError(err instanceof Error ? err.message : "An error occurred during import");
     } finally {
       setLoading(false);
     }
@@ -71,8 +152,8 @@ export default function ImportPage() {
           >
             ← Back to Admin
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Import Bills from CSV</h1>
-          <p className="text-gray-600 mt-2">Upload a CSV file to bulk add or update bills</p>
+          <h1 className="text-3xl font-bold text-gray-900">Import Bills</h1>
+          <p className="text-gray-600 mt-2">Upload a CSV file or PDF spreadsheet to bulk add or update bills</p>
         </div>
 
         {/* Instructions */}
@@ -92,7 +173,7 @@ export default function ImportPage() {
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow mb-8">
           <div className="mb-6">
             <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-2">
-              Select CSV File
+              Select File (CSV or PDF)
             </label>
             <input
               id="file"
@@ -101,9 +182,14 @@ export default function ImportPage() {
               onChange={handleFileChange}
               className="block w-full text-sm text-gray-500 file:px-4 file:py-2 file:bg-blue-50 file:text-blue-600 file:border-0 file:rounded hover:file:bg-blue-100"
             />
-            <p className="text-xs text-gray-500 mt-2">Note: CSV format recommended. If PDF files appear greyed out, select &quot;All Files&quot; from the file picker dropdown.</p>
+            <p className="text-xs text-gray-500 mt-2">Note: PDF files will be automatically converted to CSV format before importing.</p>
             {file && (
-              <p className="text-sm text-gray-600 mt-2">Selected: {file.name}</p>
+              <div className="mt-2">
+                <p className="text-sm text-gray-600">Selected: {file.name}</p>
+                {fileType && (
+                  <p className="text-sm text-green-600">Type: {fileType.toUpperCase()}</p>
+                )}
+              </div>
             )}
           </div>
 
