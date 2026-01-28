@@ -40,38 +40,38 @@ export default function AdminPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const loadBills = async () => {
       try {
-        // Check if user is authenticated (include credentials for cookies)
-        const authResponse = await fetch("/api/auth/check", {
+        // Fetch bills - will return 401 if not authenticated
+        const billsResponse = await fetch("/api/bills", {
           credentials: "include",
         });
-        if (authResponse.status === 401) {
+
+        if (billsResponse.status === 401) {
           router.push("/admin/login");
           return;
         }
 
-        // Fetch bills if authenticated
-        const billsResponse = await fetch("/api/bills", {
-          credentials: "include",
-        });
         if (!billsResponse.ok) throw new Error("Failed to fetch bills");
         const data = await billsResponse.json();
         setBills(data);
         setAuthenticated(true);
       } catch (error) {
-        console.error("Auth check error:", error);
-        router.push("/admin/login");
+        console.error("Error loading admin:", error);
+        // Don't redirect, let the page show an error or load without auth
       } finally {
         setLoading(false);
       }
     };
 
-    checkAuth();
+    loadBills();
   }, [router]);
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
     router.push("/");
   };
 
@@ -94,6 +94,7 @@ export default function AdminPage() {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
+        credentials: "include",
       });
 
       if (!response.ok) throw new Error("Failed to save bill");
@@ -140,7 +141,10 @@ export default function AdminPage() {
     if (!confirm("Are you sure?")) return;
 
     try {
-      const response = await fetch(`/api/bills/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/bills/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
       if (!response.ok) throw new Error("Delete failed");
       setBills(bills.filter(b => b.id !== id));
     } catch (error) {

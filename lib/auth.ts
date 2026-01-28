@@ -28,8 +28,8 @@ export async function createSession(): Promise<string> {
 
   cookieStore.set("admin_session", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: true, // Always use secure in production (Vercel is HTTPS)
+    sameSite: "strict",
     maxAge: SESSION_DURATION / 1000, // Convert to seconds
     path: "/",
   });
