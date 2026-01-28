@@ -1,0 +1,37 @@
+import { NextRequest, NextResponse } from "next/server";
+import { authenticate, createSession } from "@/lib/auth";
+
+export async function POST(request: NextRequest) {
+  try {
+    const { password } = await request.json();
+
+    if (!password) {
+      return NextResponse.json(
+        { error: "Password required" },
+        { status: 400 }
+      );
+    }
+
+    const isValid = await authenticate(password);
+
+    if (!isValid) {
+      return NextResponse.json(
+        { error: "Invalid password" },
+        { status: 401 }
+      );
+    }
+
+    await createSession();
+
+    return NextResponse.json(
+      { message: "Authenticated successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error during authentication:", error);
+    return NextResponse.json(
+      { error: "Authentication failed" },
+      { status: 500 }
+    );
+  }
+}
