@@ -55,16 +55,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Remove BOM if present
+    const firstLine = lines[0].replace(/^\ufeff/, "");
+
     // Detect delimiter - try comma first, then tab, then multiple spaces
     let delimiter: string | RegExp = ",";
-    if (!lines[0].includes(",") && lines[0].includes("\t")) {
+    if (!firstLine.includes(",") && firstLine.includes("\t")) {
       delimiter = "\t";
-    } else if (!lines[0].includes(",") && !lines[0].includes("\t")) {
+    } else if (!firstLine.includes(",") && !firstLine.includes("\t")) {
       // Try to detect multiple spaces as delimiter
       delimiter = /\s{2,}/;
     }
 
-    const headers = lines[0].split(delimiter as any).map(h => h.trim().toLowerCase());
+    // Normalize headers: handle spaces in header names
+    const headers = firstLine.split(delimiter as any).map(h =>
+      h.trim().toLowerCase().replace(/\s+/g, "_")
+    );
 
     for (let i = 1; i < lines.length; i++) {
       const values = lines[i].split(delimiter as any).map(v => v.trim());
