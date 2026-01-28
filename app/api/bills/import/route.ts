@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@vercel/postgres";
 import { validateSession } from "@/lib/auth";
+import Papa from "papaparse";
 
 interface BillData {
   bill_number: string;
@@ -46,44 +47,36 @@ export async function POST(request: NextRequest) {
     const bills: BillData[] = [];
     let errors: string[] = [];
 
-    // Parse CSV
-    const lines = content.split("\n").filter(line => line.trim());
-    if (lines.length < 2) {
+    // Parse CSV using Papa Parse for proper CSV handling
+    const parseResult = Papa.parse(content, {
+      header: true,
+      dynamicTyping: false,
+      skipEmptyLines: true,
+      transformHeader: (h: string) =>
+        h.trim().toLowerCase().replace(/\s+/g, "_"),
+    });
+
+    if (!parseResult.data || parseResult.data.length === 0) {
       return NextResponse.json(
-        { error: "CSV file must contain header row and data" },
+        { error: "CSV file is empty or has no valid data rows" },
         { status: 400 }
       );
     }
 
-    // Remove BOM if present
-    const firstLine = lines[0].replace(/^\ufeff/, "");
-
-    // Detect delimiter - try comma first, then tab, then multiple spaces
-    let delimiter: string | RegExp = ",";
-    if (!firstLine.includes(",") && firstLine.includes("\t")) {
-      delimiter = "\t";
-    } else if (!firstLine.includes(",") && !firstLine.includes("\t")) {
-      // Try to detect multiple spaces as delimiter
-      delimiter = /\s{2,}/;
+    if (parseResult.errors && parseResult.errors.length > 0) {
+      return NextResponse.json(
+        { error: "Failed to parse CSV file", details: parseResult.errors },
+        { status: 400 }
+      );
     }
 
-    // Normalize headers: handle spaces in header names
-    const headers = firstLine.split(delimiter as any).map(h =>
-      h.trim().toLowerCase().replace(/\s+/g, "_")
-    );
+    for (let i = 0; i < parseResult.data.length; i++) {
+      const rawRow: any = parseResult.data[i];
 
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(delimiter as any).map(v => v.trim());
-
-      // Allow some flexibility in column count (at least required fields)
-      if (values.length < 4) {
-        errors.push(`Row ${i + 1}: Not enough columns (need at least bill_number, chamber, title, position)`);
-        continue;
-      }
-
+      // Trim all values to remove leading/trailing whitespace
       const row: any = {};
-      headers.forEach((header, index) => {
-        row[header] = values[index] || null;
+      Object.keys(rawRow).forEach(key => {
+        row[key] = typeof rawRow[key] === "string" ? rawRow[key].trim() : rawRow[key];
       });
 
       // Validate required fields
