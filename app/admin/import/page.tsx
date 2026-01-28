@@ -126,10 +126,10 @@ export default function ImportPage() {
         {result && (
           <div className="bg-white p-6 rounded shadow">
             <div className={`mb-4 p-4 rounded ${
-              result.errors.length === 0 ? "bg-green-50 border border-green-200" : "bg-yellow-50 border border-yellow-200"
+              !result.errors || result.errors.length === 0 ? "bg-green-50 border border-green-200" : "bg-yellow-50 border border-yellow-200"
             }`}>
               <p className={`font-semibold ${
-                result.errors.length === 0 ? "text-green-900" : "text-yellow-900"
+                !result.errors || result.errors.length === 0 ? "text-green-900" : "text-yellow-900"
               }`}>
                 {result.message}
               </p>
@@ -148,7 +148,7 @@ export default function ImportPage() {
               </div>
             )}
 
-            {result.errors.length > 0 && (
+            {result.errors && result.errors.length > 0 && (
               <div>
                 <h3 className="font-semibold text-gray-900 mb-3">Errors ({result.errors.length})</h3>
                 <div className="space-y-2">
