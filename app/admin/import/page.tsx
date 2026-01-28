@@ -92,14 +92,22 @@ export default function ImportPage() {
           // Look for bill entries (HF/SF followed by number)
           const match = line.match(/^(HF|SF|HJ|SJ)\s+(\d+)/i);
           if (match) {
-            // Extract bill data from line
-            const parts = line.split(/[|,\t]/).map(p => p.trim());
-            if (parts.length >= 4) {
+            // Extract bill data from line - try multiple delimiters
+            let parts = line.split(/\s{2,}/).map(p => p.trim()); // Try multiple spaces first
+            if (parts.length < 3) {
+              parts = line.split(/[|,\t]/).map(p => p.trim()); // Fall back to pipes/commas/tabs
+            }
+
+            if (parts.length >= 2) {
               const billNumber = parts[0];
-              const title = parts[1] || "Unknown";
-              const shortTitle = parts[2] || title.substring(0, 50);
-              const position = parts[3] || "Undecided";
-              const chamber = billNumber.startsWith("HF") || billNumber.startsWith("HJ") ? "House" : "Senate";
+              const title = parts[1] || "Unknown Title";
+              const position = parts[2] && /^(Support|Against|Monitor|Undecided)/i.test(parts[2])
+                ? parts[2]
+                : parts[3] && /^(Support|Against|Monitor|Undecided)/i.test(parts[3])
+                ? parts[3]
+                : "Undecided";
+              const shortTitle = title.substring(0, 50);
+              const chamber = billNumber.match(/^HF|^HJ/i) ? "House" : "Senate";
 
               csvContent += `${billNumber},${chamber},"${title}","${shortTitle}",${position}\n`;
             }
@@ -107,7 +115,7 @@ export default function ImportPage() {
         }
 
         if (!csvContent.includes("\n") || csvContent.split("\n").length < 2) {
-          setError("Could not extract bill data from PDF. Please check the PDF format.");
+          setError("Could not extract bill data from PDF. Expected format: Bill Number | Title | Position or similar. Debug: " + lines.slice(0, 3).join(" | "));
           setLoading(false);
           return;
         }
