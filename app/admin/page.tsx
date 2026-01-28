@@ -156,10 +156,6 @@ export default function AdminPage() {
     return <div className="p-8 text-center">Loading...</div>;
   }
 
-  if (!authenticated) {
-    return null;
-  }
-
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
