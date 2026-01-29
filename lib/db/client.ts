@@ -1,53 +1,53 @@
-import { createClient } from '@vercel/postgres';
+import pg from 'pg';
 
-// Manually create a client with explicit connection string
-// We use DATABASE_PRISMA_DATABASE_URL which is the pooled connection from Prisma
-let cachedClient: any = null;
+const Pool = pg.Pool;
 
-async function getClient() {
-  if (cachedClient) {
-    return cachedClient;
+// Create a connection pool using DATABASE_PRISMA_DATABASE_URL
+// This is the Prisma Accelerate pooling endpoint
+let pool: any = null;
+
+function getPool() {
+  if (!pool) {
+    const connectionString = process.env.DATABASE_PRISMA_DATABASE_URL ||
+                           process.env.POSTGRES_PRISMA_URL ||
+                           process.env.DATABASE_URL;
+
+    if (!connectionString) {
+      throw new Error('[DB] No database connection string found in environment variables');
+    }
+
+    console.log('[DB] Creating pool with connection string...');
+    pool = new Pool({
+      connectionString,
+      max: 1,  // Single connection for serverless
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 20000,  // Generous timeout for cold starts
+    });
+
+    pool.on('error', (err: any) => {
+      console.error('[DB] Pool error:', err);
+      pool = null;
+    });
+
+    console.log('[DB] Pool created successfully');
   }
 
-  const connectionString = process.env.DATABASE_PRISMA_DATABASE_URL;
-
-  if (!connectionString) {
-    throw new Error('[DB] Missing DATABASE_PRISMA_DATABASE_URL');
-  }
-
-  console.log('[DB] Creating client with pooled connection...');
-  cachedClient = createClient({ connectionString });
-
-  try {
-    console.log('[DB] Connecting to database...');
-    await cachedClient.connect();
-    console.log('[DB] Successfully connected to database');
-  } catch (error) {
-    console.error('[DB] Connection error:', error);
-    cachedClient = null;
-    throw error;
-  }
-
-  return cachedClient;
+  return pool;
 }
 
 export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
+  const p = getPool();
+  const client = await p.connect();
+
   try {
-    const client = await getClient();
+    console.log('[DB] Executing query');
     if (params && params.length > 0) {
-      console.log('[DB] Executing parameterized query');
-      const result = await client.query(text, params);
-      console.log('[DB] Query succeeded');
-      return result;
+      return await client.query(text, params);
     }
-    console.log('[DB] Executing simple query');
-    const result = await client.query(text);
-    console.log('[DB] Query succeeded');
-    return result;
-  } catch (error) {
-    console.error('[DB] Query error:', error);
-    cachedClient = null;  // Reset on error to force reconnect
-    throw error;
+    return await client.query(text);
+  } finally {
+    client.release();
+    console.log('[DB] Query completed');
   }
 }
 
