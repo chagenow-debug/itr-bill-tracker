@@ -1,24 +1,54 @@
-import { sql } from '@vercel/postgres';
+import { Pool } from 'pg';
 
-// Log which connection string is being used (for debugging)
-if (typeof process !== 'undefined') {
+// Get the pooled connection string (PRISMA variants include connection pooling)
+const getConnectionString = () => {
   const connStr = process.env.DATABASE_PRISMA_DATABASE_URL ||
                   process.env.DATABASE_PRISMA_URL ||
-                  process.env.POSTGRES_PRISMA_URL ||
-                  process.env.DATABASE_URL ||
-                  process.env.POSTGRES_URL;
-  if (connStr) {
-    const host = connStr.split('@')[1]?.split('/')[0] || 'unknown';
-    console.log(`[DB] Using connection to: ${host}`);
+                  process.env.POSTGRES_PRISMA_URL;
+
+  if (!connStr) {
+    console.error('[DB] No pooled connection string found. Available vars:', {
+      has_db_prisma_database_url: !!process.env.DATABASE_PRISMA_DATABASE_URL,
+      has_db_prisma_url: !!process.env.DATABASE_PRISMA_URL,
+      has_postgres_prisma_url: !!process.env.POSTGRES_PRISMA_URL,
+      has_database_url: !!process.env.DATABASE_URL,
+      has_postgres_url: !!process.env.POSTGRES_URL,
+    });
   }
+
+  return connStr;
+};
+
+let pool: Pool | null = null;
+
+function getPool(): Pool {
+  if (!pool) {
+    const connectionString = getConnectionString();
+    if (!connectionString) {
+      throw new Error('No database connection string available');
+    }
+
+    pool = new Pool({
+      connectionString,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    });
+  }
+  return pool;
 }
 
 export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
   try {
-    if (params && params.length > 0) {
-      return await sql.query(text, params);
+    const client = await getPool().connect();
+    try {
+      if (params && params.length > 0) {
+        return await client.query(text, params);
+      }
+      return await client.query(text);
+    } finally {
+      client.release();
     }
-    return await sql.query(text);
   } catch (error) {
     console.error('Database query error:', error);
     throw error;
@@ -26,16 +56,17 @@ export async function query(text: string, params?: (string | number | null)[]): 
 }
 
 export async function getAllBills() {
-  const result = await sql`
-    SELECT * FROM bills ORDER BY bill_number ASC
-  `;
+  const result = await query(
+    "SELECT * FROM bills ORDER BY bill_number ASC"
+  );
   return result.rows;
 }
 
 export async function getBillById(id: number) {
-  const result = await sql`
-    SELECT * FROM bills WHERE id = ${id}
-  `;
+  const result = await query(
+    "SELECT * FROM bills WHERE id = $1",
+    [id]
+  );
   return result.rows[0];
 }
 
@@ -57,57 +88,61 @@ export async function createBill(data: {
   url?: string;
   notes?: string;
 }) {
-  const result = await sql`
-    INSERT INTO bills (
+  const result = await query(
+    `INSERT INTO bills (
       bill_number, companion_bills, chamber, title, short_title, description,
       committee, committee_key, status, position, sponsor, subcommittee,
       fiscal_note, lsb, url, notes, created_at, updated_at
     ) VALUES (
-      ${data.bill_number},
-      ${data.companion_bills || null},
-      ${data.chamber},
-      ${data.title},
-      ${data.short_title},
-      ${data.description || null},
-      ${data.committee || null},
-      ${data.committee_key || null},
-      ${data.status || null},
-      ${data.position},
-      ${data.sponsor || null},
-      ${data.subcommittee || null},
-      ${data.fiscal_note || null},
-      ${data.lsb || null},
-      ${data.url || null},
-      ${data.notes || null},
-      NOW(),
-      NOW()
-    ) RETURNING *
-  `;
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
+    ) RETURNING *`,
+    [
+      data.bill_number,
+      data.companion_bills || null,
+      data.chamber,
+      data.title,
+      data.short_title,
+      data.description || null,
+      data.committee || null,
+      data.committee_key || null,
+      data.status || null,
+      data.position,
+      data.sponsor || null,
+      data.subcommittee || null,
+      data.fiscal_note || null,
+      data.lsb || null,
+      data.url || null,
+      data.notes || null,
+    ]
+  );
   return result.rows[0];
 }
 
 export async function updateBill(id: number, data: Partial<typeof createBill>) {
-  // Build dynamic update query
-  const updates: string[] = [];
-  const values: (string | number | null | boolean | undefined)[] = [];
+  const fields = [];
+  const values = [];
+  let paramCount = 1;
 
-  Object.entries(data).forEach(([key]) => {
-    const value = data[key as keyof typeof data];
-    updates.push(`${key} = $${updates.length + 1}`);
-    values.push(value || null);
+  Object.entries(data).forEach(([key, value]) => {
+    fields.push(`${key} = $${paramCount}`);
+    values.push(value);
+    paramCount++;
   });
 
-  updates.push(`updated_at = NOW()`);
+  fields.push(`updated_at = NOW()`);
   values.push(id);
 
-  const queryText = `UPDATE bills SET ${updates.join(', ')} WHERE id = $${updates.length} RETURNING *`;
-  const result = await sql.query(queryText, values);
+  const result = await query(
+    `UPDATE bills SET ${fields.join(", ")} WHERE id = $${paramCount} RETURNING *`,
+    values
+  );
   return result.rows[0];
 }
 
 export async function deleteBill(id: number) {
-  const result = await sql`
-    DELETE FROM bills WHERE id = ${id} RETURNING *
-  `;
+  const result = await query(
+    "DELETE FROM bills WHERE id = $1 RETURNING *",
+    [id]
+  );
   return result.rows[0];
 }
