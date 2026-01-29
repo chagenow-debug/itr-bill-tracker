@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db/client";
+import { sql } from "@vercel/postgres";
 import { validateSession } from "@/lib/auth";
 
 export async function GET(
@@ -8,10 +8,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const result = await query(
-      "SELECT * FROM bills WHERE id = $1",
-      [parseInt(id)]
-    );
+    const result = await sql`
+      SELECT * FROM bills WHERE id = ${parseInt(id)}
+    `;
 
     if (result.rows.length === 0) {
       return NextResponse.json(
@@ -85,10 +84,9 @@ export async function PUT(
     }
 
     updateFields.push(`updated_at = NOW()`);
-    values.push(parseInt(id));
-    const queryStr = `UPDATE bills SET ${updateFields.join(", ")} WHERE id = $${values.length} RETURNING *`;
+    const queryStr = `UPDATE bills SET ${updateFields.join(", ")} WHERE id = ${id} RETURNING *`;
 
-    const result = await query(queryStr, values);
+    const result = await sql.query(queryStr, values);
 
     if (result.rows.length === 0) {
       return NextResponse.json(
@@ -122,10 +120,9 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const result = await query(
-      "DELETE FROM bills WHERE id = $1 RETURNING *",
-      [parseInt(id)]
-    );
+    const result = await sql`
+      DELETE FROM bills WHERE id = ${parseInt(id)} RETURNING *
+    `;
 
     if (result.rows.length === 0) {
       return NextResponse.json(
