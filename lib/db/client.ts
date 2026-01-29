@@ -56,6 +56,24 @@ export async function getAllBills() {
     const result = await query(
       "SELECT * FROM bills ORDER BY is_pinned DESC, bill_number ASC"
     );
+
+    // Auto-generate URLs for bills that don't have them
+    const billsWithoutUrls = result.rows.filter((bill: any) => !bill.url);
+    if (billsWithoutUrls.length > 0) {
+      console.log(`[DB] Auto-generating URLs for ${billsWithoutUrls.length} bills`);
+      for (const bill of billsWithoutUrls) {
+        try {
+          const url = generateBillUrl(bill.bill_number);
+          await query(
+            "UPDATE bills SET url = $1, updated_at = NOW() WHERE id = $2",
+            [url, bill.id]
+          );
+        } catch (e) {
+          console.log(`[DB] Error updating URL for bill ${bill.bill_number}:`, e);
+        }
+      }
+    }
+
     return result.rows;
   } catch (error: any) {
     // If is_pinned column doesn't exist, try to create it
