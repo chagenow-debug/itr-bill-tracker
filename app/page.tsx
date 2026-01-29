@@ -191,8 +191,8 @@ export default function Home() {
         }
 
         html, body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          background: #f5f5f5;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: #f8fafb;
           min-height: 100vh;
           color: #333;
         }
@@ -285,12 +285,12 @@ export default function Home() {
         .filter-group select:focus,
         .filter-group input:focus {
           outline: none;
-          border-color: #c41e3a;
-          box-shadow: 0 0 3px rgba(196, 30, 58, 0.3);
+          border-color: #1e40af;
+          box-shadow: 0 0 3px rgba(30, 64, 175, 0.3);
         }
 
         .admin-btn {
-          background: #c41e3a;
+          background: #1e40af;
           color: white;
           border: none;
           padding: 8px 20px;
@@ -303,7 +303,7 @@ export default function Home() {
         }
 
         .admin-btn:hover {
-          background: #a01830;
+          background: #1e3a8a;
         }
 
         .bills-table {
@@ -342,8 +342,16 @@ export default function Home() {
           transition: background 0.2s;
         }
 
+        .bills-table tbody tr:nth-child(odd) {
+          background: white;
+        }
+
+        .bills-table tbody tr:nth-child(even) {
+          background: #f8fafb;
+        }
+
         .bills-table tbody tr:hover {
-          background: #f9f9f9;
+          background: #eff6ff;
         }
 
         .expand-col {
