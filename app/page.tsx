@@ -14,6 +14,7 @@ interface Bill {
   url?: string;
   committee?: string;
   description?: string;
+  is_pinned?: boolean;
 }
 
 export default function Home() {
@@ -81,6 +82,104 @@ export default function Home() {
         return "position-tbd";
     }
   };
+
+  const pinnedBills = filteredBills.filter(bill => bill.is_pinned);
+  const unpinnedBills = filteredBills.filter(bill => !bill.is_pinned);
+
+  const renderBillsTable = (bills: Bill[], title: string, isPinned: boolean = false) => (
+    <div style={{ marginBottom: "2rem" }}>
+      {bills.length > 0 && (
+        <>
+          <h2 style={{
+            fontSize: "1.3rem",
+            fontWeight: "600",
+            marginBottom: "1rem",
+            color: isPinned ? "#c41e3a" : "#333",
+            borderLeft: isPinned ? "4px solid #FFD700" : "none",
+            paddingLeft: isPinned ? "12px" : "0"
+          }}>
+            {isPinned ? "⭐ " : ""}{title}
+          </h2>
+          <table className="bills-table">
+            <thead>
+              <tr>
+                <th className="expand-col"></th>
+                <th className="bill-number-col">Bill #</th>
+                <th className="title-col">Title</th>
+                <th>Committee</th>
+                <th>Status</th>
+                <th>ITR Position</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bills.map((bill) => (
+                <React.Fragment key={bill.id}>
+                  <tr>
+                    <td className="expand-col">
+                      <button
+                        className={`expand-btn ${expanded.has(bill.id) ? "active" : ""}`}
+                        onClick={() => toggleDetail(bill.id)}
+                        title="Expand details"
+                      >
+                        ▶
+                      </button>
+                    </td>
+                    <td className="bill-number-col">
+                      <a href={bill.url || "#"} target="_blank" rel="noopener noreferrer" className="bill-link">
+                        {bill.bill_number}
+                      </a>
+                    </td>
+                    <td className="title-col">
+                      <div className="short-title">{bill.short_title}</div>
+                      <div className="full-title">{bill.title}</div>
+                    </td>
+                    <td>
+                      {bill.committee ? (
+                        <span className="committee-tag">{bill.committee}</span>
+                      ) : (
+                        <span style={{ color: "#999" }}>—</span>
+                      )}
+                    </td>
+                    <td>
+                      {bill.status ? (
+                        <span className="status-badge">{bill.status}</span>
+                      ) : (
+                        <span style={{ color: "#999" }}>—</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className={`position-badge ${getPositionClass(bill.position)}`}>
+                        {bill.position}
+                      </span>
+                    </td>
+                  </tr>
+                  {expanded.has(bill.id) && (
+                    <tr className="detail-row">
+                      <td colSpan={6}>
+                        <div className="bill-detail active">
+                          <div className="detail-grid">
+                            <div className="detail-section">
+                              <h5>Full Description</h5>
+                              <p>{bill.description || "No description available"}</p>
+                            </div>
+                            <div className="detail-section">
+                              <h5>Bill Information</h5>
+                              <p><strong>Sponsor:</strong> {bill.sponsor || "Not specified"}</p>
+                              <p><strong>Chamber:</strong> {bill.chamber}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -535,82 +634,10 @@ export default function Home() {
         ) : filteredBills.length === 0 ? (
           <div className="empty-message">No bills found</div>
         ) : (
-          <table className="bills-table">
-            <thead>
-              <tr>
-                <th className="expand-col"></th>
-                <th className="bill-number-col">Bill #</th>
-                <th className="title-col">Title</th>
-                <th>Committee</th>
-                <th>Status</th>
-                <th>ITR Position</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBills.map((bill) => (
-                <React.Fragment key={bill.id}>
-                  <tr>
-                    <td className="expand-col">
-                      <button
-                        className={`expand-btn ${expanded.has(bill.id) ? "active" : ""}`}
-                        onClick={() => toggleDetail(bill.id)}
-                        title="Expand details"
-                      >
-                        ▶
-                      </button>
-                    </td>
-                    <td className="bill-number-col">
-                      <a href={bill.url || "#"} target="_blank" rel="noopener noreferrer" className="bill-link">
-                        {bill.bill_number}
-                      </a>
-                    </td>
-                    <td className="title-col">
-                      <div className="short-title">{bill.short_title}</div>
-                      <div className="full-title">{bill.title}</div>
-                    </td>
-                    <td>
-                      {bill.committee ? (
-                        <span className="committee-tag">{bill.committee}</span>
-                      ) : (
-                        <span style={{ color: "#999" }}>—</span>
-                      )}
-                    </td>
-                    <td>
-                      {bill.status ? (
-                        <span className="status-badge">{bill.status}</span>
-                      ) : (
-                        <span style={{ color: "#999" }}>—</span>
-                      )}
-                    </td>
-                    <td>
-                      <span className={`position-badge ${getPositionClass(bill.position)}`}>
-                        {bill.position}
-                      </span>
-                    </td>
-                  </tr>
-                  {expanded.has(bill.id) && (
-                    <tr className="detail-row">
-                      <td colSpan={6}>
-                        <div className="bill-detail active">
-                          <div className="detail-grid">
-                            <div className="detail-section">
-                              <h5>Full Description</h5>
-                              <p>{bill.description || "No description available"}</p>
-                            </div>
-                            <div className="detail-section">
-                              <h5>Bill Information</h5>
-                              <p><strong>Sponsor:</strong> {bill.sponsor || "Not specified"}</p>
-                              <p><strong>Chamber:</strong> {bill.chamber}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
+          <>
+            {renderBillsTable(pinnedBills, "ITR Priority Bills", true)}
+            {renderBillsTable(unpinnedBills, "All Bills", false)}
+          </>
         )}
 
         <div className="footer">

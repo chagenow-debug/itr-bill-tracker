@@ -45,7 +45,7 @@ export async function query(text: string, params?: (string | number | null)[]): 
 
 export async function getAllBills() {
   const result = await query(
-    "SELECT * FROM bills ORDER BY bill_number ASC"
+    "SELECT * FROM bills ORDER BY is_pinned DESC, bill_number ASC"
   );
   return result.rows;
 }
@@ -111,7 +111,7 @@ export async function updateBill(id: number, data: any) {
   const validColumns = [
     'bill_number', 'companion_bills', 'chamber', 'title', 'short_title',
     'description', 'committee', 'committee_key', 'status', 'position',
-    'sponsor', 'subcommittee', 'fiscal_note', 'lsb', 'url', 'notes'
+    'sponsor', 'subcommittee', 'fiscal_note', 'lsb', 'url', 'notes', 'is_pinned'
   ];
 
   const fields = [];

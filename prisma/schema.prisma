@@ -28,6 +28,7 @@ model bills {
   lsb              String?
   url              String?
   notes            String?
+  is_pinned        Boolean @default(false)
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 

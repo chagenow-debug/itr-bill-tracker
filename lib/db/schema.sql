@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS bills (
   lsb VARCHAR(100),
   url TEXT,
   notes TEXT,
+  is_pinned BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -32,6 +33,9 @@ CREATE INDEX IF NOT EXISTS idx_bills_chamber ON bills(chamber);
 
 -- Index on created_at for sorting
 CREATE INDEX IF NOT EXISTS idx_bills_created_at ON bills(created_at DESC);
+
+-- Index on is_pinned for efficient querying of priority bills
+CREATE INDEX IF NOT EXISTS idx_bills_pinned ON bills(is_pinned DESC);
 
 -- Admin logs table for audit trail
 CREATE TABLE IF NOT EXISTS admin_logs (

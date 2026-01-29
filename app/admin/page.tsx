@@ -34,6 +34,7 @@ export default function AdminPage() {
     lsb: "",
     url: "",
     notes: "",
+    is_pinned: false,
   });
   const router = useRouter();
 
@@ -120,6 +121,7 @@ export default function AdminPage() {
         lsb: "",
         url: "",
         notes: "",
+        is_pinned: false,
       });
     } catch (error) {
       alert("Error saving bill");
@@ -186,6 +188,7 @@ export default function AdminPage() {
                 lsb: "",
                 url: "",
                 notes: "",
+                is_pinned: false,
               });
             }}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -320,6 +323,20 @@ export default function AdminPage() {
                 className="border rounded px-3 py-2"
                 rows={2}
               />
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="is_pinned"
+                  checked={formData.is_pinned}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 cursor-pointer"
+                  id="is_pinned"
+                />
+                <label htmlFor="is_pinned" className="text-sm font-medium cursor-pointer">
+                  Pin as ITR Priority Bill
+                </label>
+              </div>
 
               <button
                 type="submit"
