@@ -2,6 +2,13 @@ import pg from 'pg';
 
 const Client = pg.Client;
 
+// Generate URL for Iowa Legislature bill
+function generateBillUrl(billNumber: string, gaNumber: string = "91"): string {
+  // Remove spaces from bill number for URL (e.g., "HF 2011" -> "HF2011")
+  const cleanBillNumber = billNumber.replace(/\s+/g, "");
+  return `https://www.legis.iowa.gov/legislation/BillBook?ba=${cleanBillNumber}&ga=${gaNumber}`;
+}
+
 // For serverless, create fresh client connection per query
 // This avoids pool state issues across function invocations
 export async function query(text: string, params?: (string | number | boolean | null)[]): Promise<any> {
@@ -106,6 +113,9 @@ export async function createBill(data: {
   notes?: string;
   is_pinned?: boolean;
 }) {
+  // Auto-generate URL if not provided
+  const billUrl = (data.url && data.url.trim() !== '') ? data.url : generateBillUrl(data.bill_number);
+
   const result = await query(
     `INSERT INTO bills (
       bill_number, companion_bills, chamber, title, short_title, description,
@@ -129,7 +139,7 @@ export async function createBill(data: {
       data.subcommittee || null,
       data.fiscal_note || null,
       data.lsb || null,
-      data.url || null,
+      billUrl,
       data.notes || null,
       data.is_pinned || false,
     ]
@@ -203,6 +213,9 @@ export async function upsertBill(data: {
   notes?: string;
   is_pinned?: boolean;
 }) {
+  // Auto-generate URL if not provided
+  const billUrl = (data.url && data.url.trim() !== '') ? data.url : generateBillUrl(data.bill_number);
+
   // PostgreSQL UPSERT: INSERT ... ON CONFLICT ... DO UPDATE
   const result = await query(
     `INSERT INTO bills (
@@ -246,7 +259,7 @@ export async function upsertBill(data: {
       data.subcommittee || null,
       data.fiscal_note || null,
       data.lsb || null,
-      data.url || null,
+      billUrl,
       data.notes || null,
       data.is_pinned || false,
     ]
