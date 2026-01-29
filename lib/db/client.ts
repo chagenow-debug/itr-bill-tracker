@@ -1,23 +1,49 @@
-import { sql } from "@vercel/postgres";
+import { createClient } from "@vercel/postgres";
+
+let client: any = null;
+
+async function getClient() {
+  if (!client) {
+    const pgUrl = process.env.POSTGRES_URL;
+    if (!pgUrl) {
+      throw new Error("POSTGRES_URL environment variable not set");
+    }
+
+    client = createClient({ connectionString: pgUrl });
+  }
+  return client;
+}
 
 export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
-  if (params && params.length > 0) {
-    return await sql.query(text, params);
+  const c = await getClient();
+  try {
+    if (params && params.length > 0) {
+      return await c.query(text, params);
+    }
+    return await c.query(text);
+  } catch (error: any) {
+    // Reconnect on error
+    client = null;
+    const c2 = await getClient();
+    if (params && params.length > 0) {
+      return await c2.query(text, params);
+    }
+    return await c2.query(text);
   }
-  return await sql.query(text);
 }
 
 export async function getAllBills() {
-  const result = await sql`
-    SELECT * FROM bills ORDER BY bill_number ASC
-  `;
+  const result = await query(
+    "SELECT * FROM bills ORDER BY bill_number ASC"
+  );
   return result.rows;
 }
 
 export async function getBillById(id: number) {
-  const result = await sql`
-    SELECT * FROM bills WHERE id = ${id}
-  `;
+  const result = await query(
+    "SELECT * FROM bills WHERE id = $1",
+    [id]
+  );
   return result.rows[0];
 }
 
@@ -39,21 +65,33 @@ export async function createBill(data: {
   url?: string;
   notes?: string;
 }) {
-  const result = await sql`
-    INSERT INTO bills (
+  const result = await query(
+    `INSERT INTO bills (
       bill_number, companion_bills, chamber, title, short_title, description,
       committee, committee_key, status, position, sponsor, subcommittee,
       fiscal_note, lsb, url, notes, created_at, updated_at
     ) VALUES (
-      ${data.bill_number}, ${data.companion_bills || null}, ${data.chamber},
-      ${data.title}, ${data.short_title}, ${data.description || null},
-      ${data.committee || null}, ${data.committee_key || null},
-      ${data.status || null}, ${data.position}, ${data.sponsor || null},
-      ${data.subcommittee || null}, ${data.fiscal_note || null},
-      ${data.lsb || null}, ${data.url || null}, ${data.notes || null},
-      NOW(), NOW()
-    ) RETURNING *
-  `;
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
+    ) RETURNING *`,
+    [
+      data.bill_number,
+      data.companion_bills || null,
+      data.chamber,
+      data.title,
+      data.short_title,
+      data.description || null,
+      data.committee || null,
+      data.committee_key || null,
+      data.status || null,
+      data.position,
+      data.sponsor || null,
+      data.subcommittee || null,
+      data.fiscal_note || null,
+      data.lsb || null,
+      data.url || null,
+      data.notes || null,
+    ]
+  );
   return result.rows[0];
 }
 
@@ -71,7 +109,7 @@ export async function updateBill(id: number, data: Partial<typeof createBill>) {
   fields.push(`updated_at = NOW()`);
   values.push(id);
 
-  const result = await sql.query(
+  const result = await query(
     `UPDATE bills SET ${fields.join(", ")} WHERE id = $${paramCount} RETURNING *`,
     values
   );
@@ -79,8 +117,9 @@ export async function updateBill(id: number, data: Partial<typeof createBill>) {
 }
 
 export async function deleteBill(id: number) {
-  const result = await sql`
-    DELETE FROM bills WHERE id = ${id} RETURNING *
-  `;
+  const result = await query(
+    "DELETE FROM bills WHERE id = $1 RETURNING *",
+    [id]
+  );
   return result.rows[0];
 }
