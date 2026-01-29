@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
         subcommittee: row.subcommittee || undefined,
         fiscal_note: row.fiscal_note === "true" || row.fiscal_note === "1",
         lsb: row.lsb || undefined,
-        url: row.url || undefined,
+        url: (row.url && row.url.trim() !== '') ? row.url : undefined,
         notes: row.notes || undefined,
       });
     }
