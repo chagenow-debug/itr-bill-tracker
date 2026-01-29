@@ -198,7 +198,7 @@ export default function Home() {
         }
 
         .header {
-          background: linear-gradient(90deg, #c41e3a 0%, #8b0000 100%);
+          background: linear-gradient(90deg, #1e40af 0%, #1e3a8a 100%);
           padding: 20px 30px;
           display: flex;
           justify-content: space-between;
@@ -317,7 +317,7 @@ export default function Home() {
         }
 
         .bills-table thead {
-          background: #c41e3a;
+          background: #1e40af;
         }
 
         .bills-table th {
