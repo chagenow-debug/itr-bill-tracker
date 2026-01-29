@@ -168,14 +168,15 @@ export async function POST(request: NextRequest) {
             bill.position,
             bill.sponsor || null,
             bill.subcommittee || null,
-            (bill.fiscal_note ? true : false) as any,
+            bill.fiscal_note ? true : false,
             bill.lsb || null,
-            bill.url || null,
+            null, // Always null for URL since CSV has no URLs
             bill.notes || null,
           ]
         );
         insertedBills.push(result.rows[0]);
       } catch (error: any) {
+        console.error(`Error inserting bill ${bill.bill_number}:`, error);
         if (error.message.includes("duplicate key")) {
           insertErrors.push(`Bill ${bill.bill_number}: Already exists in database`);
         } else {
