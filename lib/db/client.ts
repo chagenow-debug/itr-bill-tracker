@@ -1,5 +1,14 @@
 import { sql } from '@vercel/postgres';
 
+// Log which connection string is being used (for debugging)
+if (typeof process !== 'undefined') {
+  const connStr = process.env.DATABASE_PRISMA_URL || process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  if (connStr) {
+    const host = connStr.split('@')[1]?.split('/')[0] || 'unknown';
+    console.log(`[DB] Using connection to: ${host}`);
+  }
+}
+
 export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
   try {
     if (params && params.length > 0) {
