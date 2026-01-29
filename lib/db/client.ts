@@ -1,66 +1,15 @@
-import { Pool } from 'pg';
+import { sql } from '@vercel/postgres';
 
-// Get the pooled connection string (PRISMA variants include connection pooling)
-const getConnectionString = () => {
-  const connStr = process.env.DATABASE_PRISMA_DATABASE_URL ||
-                  process.env.DATABASE_PRISMA_URL ||
-                  process.env.POSTGRES_PRISMA_URL;
-
-  if (connStr) {
-    console.log('[DB] Using pooled connection string from:',
-      process.env.DATABASE_PRISMA_DATABASE_URL ? 'DATABASE_PRISMA_DATABASE_URL' :
-      process.env.DATABASE_PRISMA_URL ? 'DATABASE_PRISMA_URL' :
-      'POSTGRES_PRISMA_URL'
-    );
-  } else {
-    console.error('[DB] No pooled connection string found. Available vars:', {
-      has_db_prisma_database_url: !!process.env.DATABASE_PRISMA_DATABASE_URL,
-      has_db_prisma_url: !!process.env.DATABASE_PRISMA_URL,
-      has_postgres_prisma_url: !!process.env.POSTGRES_PRISMA_URL,
-      has_database_url: !!process.env.DATABASE_URL,
-      has_postgres_url: !!process.env.POSTGRES_URL,
-    });
-  }
-
-  return connStr;
-};
-
-let pool: Pool | null = null;
-
-function getPool(): Pool {
-  if (!pool) {
-    const connectionString = getConnectionString();
-    if (!connectionString) {
-      throw new Error('No database connection string available');
-    }
-
-    pool = new Pool({
-      connectionString,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 15000, // Increased from 5s to 15s for serverless cold starts
-    });
-
-    console.log('[DB] Pool created with connection config');
-  }
-  return pool;
-}
+// Vercel's @vercel/postgres handles connection pooling automatically
+// It uses DATABASE_PRISMA_DATABASE_URL or other pooled connection variants
+// No manual connection management needed
 
 export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
   try {
-    console.log('[DB] Getting pool connection...');
-    const client = await getPool().connect();
-    console.log('[DB] Connection acquired, executing query');
-    try {
-      if (params && params.length > 0) {
-        console.log('[DB] Query with', params.length, 'parameters');
-        return await client.query(text, params);
-      }
-      return await client.query(text);
-    } finally {
-      client.release();
-      console.log('[DB] Connection released');
+    if (params && params.length > 0) {
+      return await sql.query(text, params);
     }
+    return await sql.query(text);
   } catch (error) {
     console.error('[DB] Query error:', error);
     throw error;
