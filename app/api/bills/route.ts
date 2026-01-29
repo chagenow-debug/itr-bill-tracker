@@ -8,10 +8,15 @@ export async function GET() {
       "SELECT * FROM bills ORDER BY bill_number ASC"
     );
     return NextResponse.json(result.rows);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching bills:", error);
     return NextResponse.json(
-      { error: "Failed to fetch bills" },
+      {
+        error: "Failed to fetch bills",
+        message: error?.message || String(error),
+        code: error?.code,
+        details: error?.toString?.()?.substring(0, 200),
+      },
       { status: 500 }
     );
   }
