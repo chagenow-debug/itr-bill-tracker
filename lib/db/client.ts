@@ -1,53 +1,28 @@
 import pg from 'pg';
 
-const Pool = pg.Pool;
+const Client = pg.Client;
 
-// Create a connection pool using DATABASE_PRISMA_DATABASE_URL
-// This is the Prisma Accelerate pooling endpoint
-let pool: any = null;
+// For serverless, create fresh client connection per query
+// This avoids pool state issues across function invocations
+export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
+  const connectionString = process.env.DATABASE_PRISMA_DATABASE_URL ||
+                         process.env.POSTGRES_PRISMA_URL ||
+                         process.env.DATABASE_URL;
 
-function getPool() {
-  if (!pool) {
-    const connectionString = process.env.DATABASE_PRISMA_DATABASE_URL ||
-                           process.env.POSTGRES_PRISMA_URL ||
-                           process.env.DATABASE_URL;
-
-    if (!connectionString) {
-      throw new Error('[DB] No database connection string found in environment variables');
-    }
-
-    console.log('[DB] Creating pool with connection string...');
-    pool = new Pool({
-      connectionString,
-      max: 1,  // Single connection for serverless
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 20000,  // Generous timeout for cold starts
-    });
-
-    pool.on('error', (err: any) => {
-      console.error('[DB] Pool error:', err);
-      pool = null;
-    });
-
-    console.log('[DB] Pool created successfully');
+  if (!connectionString) {
+    throw new Error('[DB] No database connection string found');
   }
 
-  return pool;
-}
-
-export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
-  const p = getPool();
-  const client = await p.connect();
+  const client = new Client({ connectionString });
 
   try {
-    console.log('[DB] Executing query');
-    if (params && params.length > 0) {
-      return await client.query(text, params);
-    }
-    return await client.query(text);
+    await client.connect();
+    const result = params && params.length > 0
+      ? await client.query(text, params)
+      : await client.query(text);
+    return result;
   } finally {
-    client.release();
-    console.log('[DB] Query completed');
+    await client.end();
   }
 }
 
