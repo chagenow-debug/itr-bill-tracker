@@ -20,7 +20,6 @@ export default function Home() {
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
-  const [filter, setFilter] = useState<string>("all");
   const [chamber, setChamber] = useState<string>("all");
   const [position, setPosition] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
@@ -83,11 +82,6 @@ export default function Home() {
     }
   };
 
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/";
-  };
-
   return (
     <>
       <style>{`
@@ -97,7 +91,7 @@ export default function Home() {
           padding: 0;
         }
 
-        body {
+        html, body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           background: #f5f5f5;
           min-height: 100vh;
@@ -106,37 +100,39 @@ export default function Home() {
 
         .header {
           background: linear-gradient(90deg, #c41e3a 0%, #8b0000 100%);
-          padding: 15px 30px;
+          padding: 20px 30px;
           display: flex;
           justify-content: space-between;
           align-items: center;
           box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          flex: 1;
+        }
+
         .header h1 {
           color: white;
-          font-size: 1.5em;
+          font-size: 1.8em;
           font-weight: 600;
+          margin: 0;
         }
 
         .header-subtitle {
           color: rgba(255,255,255,0.9);
-          font-size: 0.85em;
-          margin-top: 3px;
-        }
-
-        .header-content {
-          display: flex;
-          align-items: center;
-          gap: 15px;
+          font-size: 0.9em;
         }
 
         .session-info {
           background: rgba(255,255,255,0.15);
-          padding: 8px 15px;
+          padding: 10px 20px;
           border-radius: 6px;
           text-align: right;
-          font-size: 0.85em;
+          font-size: 0.9em;
+          color: rgba(255,255,255,0.95);
         }
 
         .session-info span {
@@ -158,22 +154,25 @@ export default function Home() {
           display: flex;
           gap: 15px;
           flex-wrap: wrap;
-          align-items: center;
+          align-items: flex-end;
           border: 1px solid #ddd;
         }
 
         .filter-group {
           display: flex;
           flex-direction: column;
-          gap: 3px;
+          gap: 5px;
         }
 
         .filter-group label {
           font-size: 0.8em;
           color: #666;
+          font-weight: 600;
+          text-transform: uppercase;
         }
 
-        .filter-group select, .filter-group input {
+        .filter-group select,
+        .filter-group input {
           padding: 8px 12px;
           border-radius: 4px;
           border: 1px solid #ccc;
@@ -183,9 +182,28 @@ export default function Home() {
           min-width: 160px;
         }
 
-        .filter-group select:focus, .filter-group input:focus {
+        .filter-group select:focus,
+        .filter-group input:focus {
           outline: none;
           border-color: #c41e3a;
+          box-shadow: 0 0 3px rgba(196, 30, 58, 0.3);
+        }
+
+        .admin-btn {
+          background: #c41e3a;
+          color: white;
+          border: none;
+          padding: 8px 20px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 0.9em;
+          font-weight: 600;
+          transition: background 0.2s;
+          margin-left: auto;
+        }
+
+        .admin-btn:hover {
+          background: #a01830;
         }
 
         .bills-table {
@@ -202,24 +220,18 @@ export default function Home() {
         }
 
         .bills-table th {
-          padding: 10px 8px;
+          padding: 12px 10px;
           text-align: left;
           font-weight: 600;
           color: white;
           font-size: 0.85em;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          cursor: pointer;
-          user-select: none;
           white-space: nowrap;
         }
 
-        .bills-table th:hover {
-          background: #a01830;
-        }
-
         .bills-table td {
-          padding: 8px;
+          padding: 10px;
           border-bottom: 1px solid #eee;
           font-size: 0.9em;
           vertical-align: top;
@@ -233,11 +245,26 @@ export default function Home() {
           background: #f9f9f9;
         }
 
+        .expand-col {
+          width: 30px;
+          text-align: center;
+        }
+
+        .bill-number-col {
+          width: 90px;
+          font-weight: 600;
+          color: #1565c0;
+        }
+
+        .title-col {
+          flex: 1;
+          min-width: 250px;
+        }
+
         .bill-link {
           color: #1565c0;
           text-decoration: none;
           font-weight: 600;
-          transition: color 0.2s;
         }
 
         .bill-link:hover {
@@ -245,13 +272,25 @@ export default function Home() {
           text-decoration: underline;
         }
 
+        .short-title {
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 3px;
+        }
+
+        .full-title {
+          color: #666;
+          font-size: 0.85em;
+        }
+
         .position-badge {
           display: inline-block;
-          padding: 3px 10px;
+          padding: 4px 10px;
           border-radius: 12px;
-          font-size: 0.8em;
-          font-weight: 600;
+          font-size: 0.75em;
+          font-weight: 700;
           text-transform: uppercase;
+          white-space: nowrap;
         }
 
         .position-support {
@@ -278,6 +317,15 @@ export default function Home() {
           border: 1px solid #bdbdbd;
         }
 
+        .committee-tag {
+          display: inline-block;
+          background: #f3e5f5;
+          color: #7b1fa2;
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-size: 0.8em;
+        }
+
         .status-badge {
           display: inline-block;
           padding: 2px 8px;
@@ -288,59 +336,19 @@ export default function Home() {
           border: 1px solid #90caf9;
         }
 
-        .committee-tag {
-          background: #f3e5f5;
-          color: #7b1fa2;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-size: 0.8em;
-        }
-
-        .bill-detail {
-          display: none;
-          background: #fafafa;
-          padding: 15px;
-          margin-top: -1px;
-          border-bottom: 1px solid #ddd;
-        }
-
-        .bill-detail.active {
-          display: table-row;
-        }
-
-        .bill-detail h4 {
-          color: #c41e3a;
-          margin-bottom: 10px;
-        }
-
-        .detail-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 15px;
-        }
-
-        .detail-section h5 {
-          color: #666;
-          font-size: 0.8em;
-          margin-bottom: 5px;
-          text-transform: uppercase;
-        }
-
-        .detail-section p {
-          color: #333;
-          line-height: 1.5;
-          font-size: 0.9em;
-        }
-
         .expand-btn {
           background: none;
           border: none;
           color: #1565c0;
           cursor: pointer;
-          font-size: 1em;
+          font-size: 1.2em;
           transition: transform 0.2s;
-          width: 20px;
-          height: 20px;
+          padding: 0;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .expand-btn:hover {
@@ -351,28 +359,66 @@ export default function Home() {
           transform: rotate(90deg);
         }
 
+        .detail-row td {
+          padding: 0;
+        }
+
+        .bill-detail {
+          display: none;
+          background: #fafafa;
+          padding: 20px;
+          border-top: 1px solid #eee;
+          border-bottom: 1px solid #eee;
+        }
+
+        .bill-detail.active {
+          display: block;
+        }
+
+        .detail-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 20px;
+        }
+
+        .detail-section h5 {
+          color: #666;
+          font-size: 0.75em;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+        }
+
+        .detail-section p {
+          color: #333;
+          line-height: 1.6;
+          font-size: 0.9em;
+          margin: 5px 0;
+        }
+
         .footer {
           text-align: center;
-          padding: 20px;
+          padding: 30px 20px;
           color: #666;
-          font-size: 0.8em;
+          font-size: 0.85em;
           margin-top: 20px;
         }
 
-        .admin-btn {
-          background: #c41e3a;
-          color: white;
-          border: none;
-          padding: 8px 15px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 0.9em;
-          margin-left: auto;
-          transition: background 0.2s;
+        .footer a {
+          color: #1565c0;
+          text-decoration: none;
         }
 
-        .admin-btn:hover {
-          background: #a01830;
+        .footer a:hover {
+          text-decoration: underline;
+        }
+
+        .empty-message {
+          text-align: center;
+          padding: 60px 20px;
+          color: #666;
+          font-size: 0.95em;
         }
 
         @media (max-width: 768px) {
@@ -380,29 +426,49 @@ export default function Home() {
             flex-direction: column;
             text-align: center;
             gap: 10px;
-            padding: 15px;
+          }
+
+          .header-left {
+            flex-direction: column;
+            gap: 5px;
+          }
+
+          .session-info {
+            text-align: center;
           }
 
           .filters {
             flex-direction: column;
+            align-items: stretch;
           }
 
-          .filter-group select, .filter-group input {
+          .filter-group select,
+          .filter-group input {
+            width: 100%;
+          }
+
+          .admin-btn {
+            margin-left: 0;
             width: 100%;
           }
 
           .bills-table {
-            font-size: 0.8em;
+            font-size: 0.85em;
           }
 
-          .bills-table th, .bills-table td {
-            padding: 6px 4px;
+          .bills-table th,
+          .bills-table td {
+            padding: 8px;
+          }
+
+          .title-col {
+            min-width: 200px;
           }
         }
       `}</style>
 
       <div className="header">
-        <div className="header-content">
+        <div className="header-left">
           <div>
             <h1>ITR Bill Tracker</h1>
             <div className="header-subtitle">Legislative Bill Tracker - 91st General Assembly</div>
@@ -410,7 +476,7 @@ export default function Home() {
         </div>
         <div className="session-info">
           <div>Session: <span>91st GA (2025-2027)</span></div>
-          <div style={{ color: "#666", fontSize: "0.8em", marginTop: "5px" }}>Last Updated: January 28, 2026</div>
+          <div style={{ fontSize: "0.8em", marginTop: "3px" }}>Last Updated: January 28, 2026</div>
         </div>
       </div>
 
@@ -447,100 +513,93 @@ export default function Home() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "40px", background: "white", borderRadius: "8px" }}>
-            <p style={{ color: "#666" }}>Loading bills...</p>
-          </div>
+          <div className="empty-message">Loading bills...</div>
+        ) : filteredBills.length === 0 ? (
+          <div className="empty-message">No bills found</div>
         ) : (
-          <>
-            <table className="bills-table">
-              <thead>
-                <tr>
-                  <th style={{ width: "40px" }}></th>
-                  <th>Bill #</th>
-                  <th>Title</th>
-                  <th>Committee</th>
-                  <th>Status</th>
-                  <th>ITR Position</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredBills.length === 0 ? (
+          <table className="bills-table">
+            <thead>
+              <tr>
+                <th className="expand-col"></th>
+                <th className="bill-number-col">Bill #</th>
+                <th className="title-col">Title</th>
+                <th>Committee</th>
+                <th>Status</th>
+                <th>ITR Position</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredBills.map((bill) => (
+                <tbody key={bill.id}>
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "center", padding: "40px", color: "#666" }}>
-                      No bills found
+                    <td className="expand-col">
+                      <button
+                        className={`expand-btn ${expanded.has(bill.id) ? "active" : ""}`}
+                        onClick={() => toggleDetail(bill.id)}
+                        title="Expand details"
+                      >
+                        ▶
+                      </button>
+                    </td>
+                    <td className="bill-number-col">
+                      <a href={bill.url || "#"} target="_blank" rel="noopener noreferrer" className="bill-link">
+                        {bill.bill_number}
+                      </a>
+                    </td>
+                    <td className="title-col">
+                      <div className="short-title">{bill.short_title}</div>
+                      <div className="full-title">{bill.title}</div>
+                    </td>
+                    <td>
+                      {bill.committee ? (
+                        <span className="committee-tag">{bill.committee}</span>
+                      ) : (
+                        <span style={{ color: "#999" }}>—</span>
+                      )}
+                    </td>
+                    <td>
+                      {bill.status ? (
+                        <span className="status-badge">{bill.status}</span>
+                      ) : (
+                        <span style={{ color: "#999" }}>—</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className={`position-badge ${getPositionClass(bill.position)}`}>
+                        {bill.position}
+                      </span>
                     </td>
                   </tr>
-                ) : (
-                  filteredBills.map((bill) => (
-                    <tbody key={bill.id}>
-                      <tr>
-                        <td>
-                          <button
-                            className={`expand-btn ${expanded.has(bill.id) ? "active" : ""}`}
-                            onClick={() => toggleDetail(bill.id)}
-                          >
-                            ▶
-                          </button>
-                        </td>
-                        <td>
-                          <a href={bill.url || "#"} target="_blank" rel="noopener noreferrer" className="bill-link">
-                            {bill.bill_number}
-                          </a>
-                        </td>
-                        <td>
-                          <strong>{bill.short_title}</strong>
-                          <br />
-                          <small style={{ color: "#666" }}>
-                            {bill.title.substring(0, 60)}
-                            {bill.title.length > 60 ? "..." : ""}
-                          </small>
-                        </td>
-                        <td>
-                          {bill.committee && <span className="committee-tag">{bill.committee}</span>}
-                        </td>
-                        <td>
-                          {bill.status && <span className="status-badge">{bill.status}</span>}
-                        </td>
-                        <td>
-                          <span className={`position-badge ${getPositionClass(bill.position)}`}>
-                            {bill.position}
-                          </span>
-                        </td>
-                      </tr>
-                      {expanded.has(bill.id) && (
-                        <tr>
-                          <td colSpan={6}>
-                            <div className="bill-detail active">
-                              <div className="detail-grid">
-                                <div className="detail-section">
-                                  <h5>Full Description</h5>
-                                  <p>{bill.description || "No description available"}</p>
-                                </div>
-                                <div className="detail-section">
-                                  <h5>Bill Information</h5>
-                                  <p><strong>Sponsor:</strong> {bill.sponsor || "Not specified"}</p>
-                                  <p><strong>Chamber:</strong> {bill.chamber}</p>
-                                </div>
-                              </div>
+                  {expanded.has(bill.id) && (
+                    <tr className="detail-row">
+                      <td colSpan={6}>
+                        <div className="bill-detail active">
+                          <div className="detail-grid">
+                            <div className="detail-section">
+                              <h5>Full Description</h5>
+                              <p>{bill.description || "No description available"}</p>
                             </div>
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </>
+                            <div className="detail-section">
+                              <h5>Bill Information</h5>
+                              <p><strong>Sponsor:</strong> {bill.sponsor || "Not specified"}</p>
+                              <p><strong>Chamber:</strong> {bill.chamber}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              ))}
+            </tbody>
+          </table>
         )}
 
         <div className="footer">
           <p>Iowans for Tax Relief - A 501(c)(4) Organization Promoting Free Market Principles</p>
           <p style={{ marginTop: "10px" }}>
             Data sourced from{" "}
-            <a href="https://www.legis.iowa.gov" style={{ color: "#1565c0" }}>
-              Iowa Legislature
-            </a>
+            <a href="https://www.legis.iowa.gov">Iowa Legislature</a>
           </p>
         </div>
       </div>
