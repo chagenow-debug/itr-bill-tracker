@@ -3,6 +3,13 @@ import { upsertBill } from "@/lib/db/client";
 import { validateSession } from "@/lib/auth";
 import Papa from "papaparse";
 
+// Generate URL for Iowa Legislature bill
+function generateBillUrl(billNumber: string, gaNumber: string = "91"): string {
+  // Remove spaces from bill number for URL (e.g., "HF 2011" -> "HF2011")
+  const cleanBillNumber = billNumber.replace(/\s+/g, "");
+  return `https://www.legis.iowa.gov/legislation/BillBook?ba=${cleanBillNumber}&ga=${gaNumber}`;
+}
+
 interface BillData {
   bill_number: string;
   companion_bills?: string;
@@ -111,6 +118,9 @@ export async function POST(request: NextRequest) {
         row.position = "Monitor"; // Default to Monitor for unspecified positions
       }
 
+      // Generate URL if not provided
+      const billUrl = (row.url && row.url.trim() !== '') ? row.url : generateBillUrl(row.bill_number);
+
       bills.push({
         bill_number: row.bill_number,
         companion_bills: row.companion_bills || undefined,
@@ -126,7 +136,7 @@ export async function POST(request: NextRequest) {
         subcommittee: row.subcommittee || undefined,
         fiscal_note: row.fiscal_note === "true" || row.fiscal_note === "1",
         lsb: row.lsb || undefined,
-        url: (row.url && row.url.trim() !== '') ? row.url : undefined,
+        url: billUrl,
         notes: row.notes || undefined,
       });
     }
