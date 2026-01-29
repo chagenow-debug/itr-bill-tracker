@@ -4,10 +4,10 @@ let pool: Pool | null = null;
 
 function getPool() {
   if (!pool) {
-    // Use POSTGRES_URL directly - pg Pool handles both pooled and direct connections
-    const connectionString = process.env.POSTGRES_URL;
+    // Prefer POSTGRES_PRISMA_URL (pooled connection) over POSTGRES_URL (direct connection)
+    const connectionString = process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL;
     if (!connectionString) {
-      throw new Error('POSTGRES_URL environment variable not set');
+      throw new Error('Neither POSTGRES_PRISMA_URL nor POSTGRES_URL environment variable set');
     }
 
     // Create a connection pool
