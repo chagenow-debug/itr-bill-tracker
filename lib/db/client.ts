@@ -134,3 +134,70 @@ export async function deleteBill(id: number) {
   );
   return result.rows[0];
 }
+
+export async function upsertBill(data: {
+  bill_number: string;
+  companion_bills?: string;
+  chamber: string;
+  title: string;
+  short_title: string;
+  description?: string;
+  committee?: string;
+  committee_key?: string;
+  status?: string;
+  position: "Support" | "Against" | "Monitor" | "Undecided";
+  sponsor?: string;
+  subcommittee?: string;
+  fiscal_note?: string;
+  lsb?: string;
+  url?: string;
+  notes?: string;
+}) {
+  // PostgreSQL UPSERT: INSERT ... ON CONFLICT ... DO UPDATE
+  const result = await query(
+    `INSERT INTO bills (
+      bill_number, companion_bills, chamber, title, short_title, description,
+      committee, committee_key, status, position, sponsor, subcommittee,
+      fiscal_note, lsb, url, notes, created_at, updated_at
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
+    )
+    ON CONFLICT (bill_number) DO UPDATE SET
+      companion_bills = $2,
+      chamber = $3,
+      title = $4,
+      short_title = $5,
+      description = $6,
+      committee = $7,
+      committee_key = $8,
+      status = $9,
+      position = $10,
+      sponsor = $11,
+      subcommittee = $12,
+      fiscal_note = $13,
+      lsb = $14,
+      url = $15,
+      notes = $16,
+      updated_at = NOW()
+    RETURNING *`,
+    [
+      data.bill_number,
+      data.companion_bills || null,
+      data.chamber,
+      data.title,
+      data.short_title,
+      data.description || null,
+      data.committee || null,
+      data.committee_key || null,
+      data.status || null,
+      data.position,
+      data.sponsor || null,
+      data.subcommittee || null,
+      data.fiscal_note || null,
+      data.lsb || null,
+      data.url || null,
+      data.notes || null,
+    ]
+  );
+  return result.rows[0];
+}

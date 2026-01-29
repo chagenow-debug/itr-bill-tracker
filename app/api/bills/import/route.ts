@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createBill } from "@/lib/db/client";
+import { upsertBill } from "@/lib/db/client";
 import { validateSession } from "@/lib/auth";
 import Papa from "papaparse";
 
@@ -141,13 +141,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Insert bills into database
-    const insertedBills = [];
-    const insertErrors = [];
+    // Upsert bills into database (insert or replace if exists)
+    const upsertedBills = [];
+    const upsertErrors = [];
 
     for (const bill of bills) {
       try {
-        const result = await createBill({
+        const result = await upsertBill({
           bill_number: bill.bill_number,
           companion_bills: bill.companion_bills,
           chamber: bill.chamber,
@@ -165,23 +165,19 @@ export async function POST(request: NextRequest) {
           url: bill.url,
           notes: bill.notes,
         });
-        insertedBills.push(result);
+        upsertedBills.push(result);
       } catch (error: any) {
-        console.error(`Error inserting bill ${bill.bill_number}:`, error);
-        if (error.code === '23505') { // PostgreSQL unique constraint violation
-          insertErrors.push(`Bill ${bill.bill_number}: Already exists in database`);
-        } else {
-          insertErrors.push(`Bill ${bill.bill_number}: ${error.message}`);
-        }
+        console.error(`Error upserting bill ${bill.bill_number}:`, error);
+        upsertErrors.push(`Bill ${bill.bill_number}: ${error.message}`);
       }
     }
 
     return NextResponse.json(
       {
-        message: `Imported ${insertedBills.length} bills`,
-        imported: insertedBills,
-        errors: insertErrors,
-        skipped: insertErrors.length,
+        message: `Processed ${upsertedBills.length} bills (inserted or updated)`,
+        processed: upsertedBills,
+        errors: upsertErrors,
+        failed: upsertErrors.length,
       },
       { status: 200 }
     );
