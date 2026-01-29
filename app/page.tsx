@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface Bill {
   id: number;
@@ -530,7 +530,7 @@ export default function Home() {
             </thead>
             <tbody>
               {filteredBills.map((bill) => (
-                <tbody key={bill.id}>
+                <React.Fragment key={bill.id}>
                   <tr>
                     <td className="expand-col">
                       <button
@@ -589,7 +589,7 @@ export default function Home() {
                       </td>
                     </tr>
                   )}
-                </tbody>
+                </React.Fragment>
               ))}
             </tbody>
           </table>
