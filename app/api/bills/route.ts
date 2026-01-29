@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
       lsb: data.lsb || undefined,
       url: data.url || undefined,
       notes: data.notes || undefined,
+      is_pinned: data.is_pinned || false,
     });
 
     return NextResponse.json(bill, { status: 201 });

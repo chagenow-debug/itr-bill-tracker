@@ -4,7 +4,7 @@ const Client = pg.Client;
 
 // For serverless, create fresh client connection per query
 // This avoids pool state issues across function invocations
-export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
+export async function query(text: string, params?: (string | number | boolean | null)[]): Promise<any> {
   // Prefer regular postgres:// connection string over prisma+postgres://
   // The native pg module doesn't understand prisma+postgres:// URLs
   const connectionString = process.env.DATABASE_URL ||
@@ -43,7 +43,28 @@ export async function query(text: string, params?: (string | number | null)[]): 
   }
 }
 
+// Ensure the is_pinned column exists
+let schemaInitialized = false;
+export async function ensureSchema() {
+  if (schemaInitialized) return;
+
+  try {
+    // Add is_pinned column if it doesn't exist
+    await query(
+      'ALTER TABLE bills ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT FALSE'
+    );
+    // Create index if it doesn't exist
+    await query(
+      'CREATE INDEX IF NOT EXISTS idx_bills_pinned ON bills(is_pinned DESC)'
+    );
+    schemaInitialized = true;
+  } catch (error) {
+    console.log('[DB] Schema check/init error (expected if already exists):', error);
+  }
+}
+
 export async function getAllBills() {
+  await ensureSchema();
   const result = await query(
     "SELECT * FROM bills ORDER BY is_pinned DESC, bill_number ASC"
   );
@@ -75,14 +96,15 @@ export async function createBill(data: {
   lsb?: string;
   url?: string;
   notes?: string;
+  is_pinned?: boolean;
 }) {
   const result = await query(
     `INSERT INTO bills (
       bill_number, companion_bills, chamber, title, short_title, description,
       committee, committee_key, status, position, sponsor, subcommittee,
-      fiscal_note, lsb, url, notes, created_at, updated_at
+      fiscal_note, lsb, url, notes, is_pinned, created_at, updated_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW()
     ) RETURNING *`,
     [
       data.bill_number,
@@ -101,6 +123,7 @@ export async function createBill(data: {
       data.lsb || null,
       data.url || null,
       data.notes || null,
+      data.is_pinned || false,
     ]
   );
   return result.rows[0];
@@ -170,15 +193,16 @@ export async function upsertBill(data: {
   lsb?: string;
   url?: string;
   notes?: string;
+  is_pinned?: boolean;
 }) {
   // PostgreSQL UPSERT: INSERT ... ON CONFLICT ... DO UPDATE
   const result = await query(
     `INSERT INTO bills (
       bill_number, companion_bills, chamber, title, short_title, description,
       committee, committee_key, status, position, sponsor, subcommittee,
-      fiscal_note, lsb, url, notes, created_at, updated_at
+      fiscal_note, lsb, url, notes, is_pinned, created_at, updated_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW()
     )
     ON CONFLICT (bill_number) DO UPDATE SET
       companion_bills = $2,
@@ -196,6 +220,7 @@ export async function upsertBill(data: {
       lsb = $14,
       url = $15,
       notes = $16,
+      is_pinned = $17,
       updated_at = NOW()
     RETURNING *`,
     [
@@ -215,6 +240,7 @@ export async function upsertBill(data: {
       data.lsb || null,
       data.url || null,
       data.notes || null,
+      data.is_pinned || false,
     ]
   );
   return result.rows[0];
