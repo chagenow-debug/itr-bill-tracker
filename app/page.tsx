@@ -121,9 +121,10 @@ export default function Home() {
           margin: 0;
         }
 
-        .header-subtitle {
-          color: rgba(255,255,255,0.9);
-          font-size: 0.9em;
+        .header-logo {
+          height: 50px;
+          width: auto;
+          display: block;
         }
 
         .session-info {
@@ -488,10 +489,8 @@ export default function Home() {
 
       <div className="header">
         <div className="header-left">
-          <div>
-            <h1>ITR Bill Tracker</h1>
-            <div className="header-subtitle">Legislative Bill Tracker - 91st General Assembly</div>
-          </div>
+          <img src="/itr_logo.png" alt="ITR Logo" className="header-logo" />
+          <h1>ITR Bill Tracker</h1>
         </div>
         <div className="session-info">
           <div>Session: <span>91st GA (2025-2027)</span></div>
