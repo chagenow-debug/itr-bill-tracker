@@ -13,19 +13,31 @@ export async function query(text: string, params?: (string | number | null)[]): 
     throw new Error('[DB] No database connection string found');
   }
 
+  console.log('[DB] Attempting connection with:', connectionString.substring(0, 50) + '...');
+
   const client = new Client({
     connectionString,
     ssl: { rejectUnauthorized: false },  // Required for Prisma Accelerate
   });
 
   try {
+    console.log('[DB] Connecting...');
     await client.connect();
+    console.log('[DB] Connected');
     const result = params && params.length > 0
       ? await client.query(text, params)
       : await client.query(text);
+    console.log('[DB] Query executed');
     return result;
+  } catch (error) {
+    console.error('[DB] Error:', error);
+    throw error;
   } finally {
-    await client.end();
+    try {
+      await client.end();
+    } catch (e) {
+      console.log('[DB] Error closing connection:', e);
+    }
   }
 }
 
