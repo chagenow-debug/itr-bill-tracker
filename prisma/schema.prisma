@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model bills {
+  id               Int     @id @default(autoincrement())
+  bill_number      String  @unique
+  companion_bills  String?
+  chamber          String
+  title            String
+  short_title      String
+  description      String?
+  committee        String?
+  committee_key    String?
+  status           String?
+  position         String  // Support, Against, Monitor, Undecided
+  sponsor          String?
+  subcommittee     String?
+  fiscal_note      Boolean @default(false)
+  lsb              String?
+  url              String?
+  notes            String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@map("bills")
+}
+
+model admin_logs {
+  id        Int     @id @default(autoincrement())
+  action    String
+  bill_id   Int?
+  changes   Json?
+  created_at DateTime @default(now())
+
+  @@map("admin_logs")
+}

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db/client";
+import { prisma } from "@/lib/prisma";
 import { validateSession } from "@/lib/auth";
 import Papa from "papaparse";
 
@@ -147,37 +147,30 @@ export async function POST(request: NextRequest) {
 
     for (const bill of bills) {
       try {
-        const result = await query(
-          `INSERT INTO bills (
-            bill_number, companion_bills, chamber, title, short_title, description,
-            committee, committee_key, status, position, sponsor, subcommittee,
-            fiscal_note, lsb, url, notes, created_at, updated_at
-          ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
-          ) RETURNING *`,
-          [
-            bill.bill_number,
-            bill.companion_bills || null,
-            bill.chamber,
-            bill.title,
-            bill.short_title,
-            bill.description || null,
-            bill.committee || null,
-            bill.committee_key || null,
-            bill.status || null,
-            bill.position,
-            bill.sponsor || null,
-            bill.subcommittee || null,
-            bill.fiscal_note ? 1 : 0,
-            bill.lsb || null,
-            null,
-            bill.notes || null,
-          ] as (string | number | null)[]
-        );
-        insertedBills.push(result.rows[0]);
+        const result = await prisma.bills.create({
+          data: {
+            bill_number: bill.bill_number,
+            companion_bills: bill.companion_bills || null,
+            chamber: bill.chamber,
+            title: bill.title,
+            short_title: bill.short_title,
+            description: bill.description || null,
+            committee: bill.committee || null,
+            committee_key: bill.committee_key || null,
+            status: bill.status || null,
+            position: bill.position,
+            sponsor: bill.sponsor || null,
+            subcommittee: bill.subcommittee || null,
+            fiscal_note: bill.fiscal_note === 'true' || bill.fiscal_note === true || false,
+            lsb: bill.lsb || null,
+            url: null,
+            notes: bill.notes || null,
+          },
+        });
+        insertedBills.push(result);
       } catch (error: any) {
         console.error(`Error inserting bill ${bill.bill_number}:`, error);
-        if (error.message.includes("duplicate key")) {
+        if (error.code === 'P2002') {
           insertErrors.push(`Bill ${bill.bill_number}: Already exists in database`);
         } else {
           insertErrors.push(`Bill ${bill.bill_number}: ${error.message}`);

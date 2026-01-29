@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db/client";
+import { prisma } from "@/lib/prisma";
 import { validateSession } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const result = await query(
-      "SELECT * FROM bills ORDER BY bill_number ASC"
-    );
-    return NextResponse.json(result.rows);
-  } catch (error: any) {
+    const bills = await prisma.bills.findMany({
+      orderBy: { bill_number: 'asc' },
+    });
+    return NextResponse.json(bills);
+  } catch (error) {
     console.error("Error fetching bills:", error);
     return NextResponse.json(
-      {
-        error: "Failed to fetch bills",
-        message: error?.message || String(error),
-        code: error?.code,
-        details: error?.toString?.()?.substring(0, 200),
-      },
+      { error: "Failed to fetch bills" },
       { status: 500 }
     );
   }
@@ -24,7 +19,6 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    // Validate admin session
     const isAdmin = await validateSession();
     if (!isAdmin) {
       return NextResponse.json(
@@ -35,35 +29,28 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
 
-    const result = await query(
-      `INSERT INTO bills (
-        bill_number, companion_bills, chamber, title, short_title, description,
-        committee, committee_key, status, position, sponsor, subcommittee,
-        fiscal_note, lsb, url, notes, created_at, updated_at
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
-      ) RETURNING *`,
-      [
-        data.bill_number,
-        data.companion_bills || null,
-        data.chamber,
-        data.title,
-        data.short_title,
-        data.description || null,
-        data.committee || null,
-        data.committee_key || null,
-        data.status || null,
-        data.position,
-        data.sponsor || null,
-        data.subcommittee || null,
-        data.fiscal_note || false,
-        data.lsb || null,
-        data.url || null,
-        data.notes || null,
-      ]
-    );
+    const bill = await prisma.bills.create({
+      data: {
+        bill_number: data.bill_number,
+        companion_bills: data.companion_bills || null,
+        chamber: data.chamber,
+        title: data.title,
+        short_title: data.short_title,
+        description: data.description || null,
+        committee: data.committee || null,
+        committee_key: data.committee_key || null,
+        status: data.status || null,
+        position: data.position,
+        sponsor: data.sponsor || null,
+        subcommittee: data.subcommittee || null,
+        fiscal_note: data.fiscal_note || false,
+        lsb: data.lsb || null,
+        url: data.url || null,
+        notes: data.notes || null,
+      },
+    });
 
-    return NextResponse.json(result.rows[0], { status: 201 });
+    return NextResponse.json(bill, { status: 201 });
   } catch (error) {
     console.error("Error creating bill:", error);
     return NextResponse.json(
