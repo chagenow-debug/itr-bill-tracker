@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sql } from "@vercel/postgres";
 import { validateSession } from "@/lib/auth";
-import { query } from "@/lib/db/client";
 import Papa from "papaparse";
 
 interface BillData {
@@ -147,33 +147,32 @@ export async function POST(request: NextRequest) {
 
     for (const bill of bills) {
       try {
-        const result = await query(
-          `INSERT INTO bills (
+        const result = await sql`
+          INSERT INTO bills (
             bill_number, companion_bills, chamber, title, short_title, description,
             committee, committee_key, status, position, sponsor, subcommittee,
             fiscal_note, lsb, url, notes, created_at, updated_at
           ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
-          ) RETURNING *`,
-          [
-            bill.bill_number,
-            bill.companion_bills || null,
-            bill.chamber,
-            bill.title,
-            bill.short_title,
-            bill.description || null,
-            bill.committee || null,
-            bill.committee_key || null,
-            bill.status || null,
-            bill.position,
-            bill.sponsor || null,
-            bill.subcommittee || null,
-            (bill.fiscal_note ? true : false) as any,
-            bill.lsb || null,
-            null, // Always null for URL since CSV has no URLs
-            bill.notes || null,
-          ]
-        );
+            ${bill.bill_number},
+            ${bill.companion_bills || null},
+            ${bill.chamber},
+            ${bill.title},
+            ${bill.short_title},
+            ${bill.description || null},
+            ${bill.committee || null},
+            ${bill.committee_key || null},
+            ${bill.status || null},
+            ${bill.position},
+            ${bill.sponsor || null},
+            ${bill.subcommittee || null},
+            ${bill.fiscal_note || false},
+            ${bill.lsb || null},
+            ${null},
+            ${bill.notes || null},
+            NOW(),
+            NOW()
+          ) RETURNING *
+        `;
         insertedBills.push(result.rows[0]);
       } catch (error: any) {
         console.error(`Error inserting bill ${bill.bill_number}:`, error);
