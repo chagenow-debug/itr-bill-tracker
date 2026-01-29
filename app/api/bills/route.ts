@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db/client";
+import { sql } from "@vercel/postgres";
 import { validateSession } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const result = await query(
-      "SELECT * FROM bills ORDER BY bill_number ASC"
-    );
+    const result = await sql`
+      SELECT * FROM bills ORDER BY bill_number ASC
+    `;
     return NextResponse.json(result.rows);
   } catch (error) {
     console.error("Error fetching bills:", error);
@@ -30,33 +30,32 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
 
-    const result = await query(
-      `INSERT INTO bills (
+    const result = await sql`
+      INSERT INTO bills (
         bill_number, companion_bills, chamber, title, short_title, description,
         committee, committee_key, status, position, sponsor, subcommittee,
         fiscal_note, lsb, url, notes, created_at, updated_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
-      ) RETURNING *`,
-      [
-        data.bill_number,
-        data.companion_bills || null,
-        data.chamber,
-        data.title,
-        data.short_title,
-        data.description || null,
-        data.committee || null,
-        data.committee_key || null,
-        data.status || null,
-        data.position,
-        data.sponsor || null,
-        data.subcommittee || null,
-        data.fiscal_note || false,
-        data.lsb || null,
-        data.url || null,
-        data.notes || null,
-      ]
-    );
+        ${data.bill_number},
+        ${data.companion_bills || null},
+        ${data.chamber},
+        ${data.title},
+        ${data.short_title},
+        ${data.description || null},
+        ${data.committee || null},
+        ${data.committee_key || null},
+        ${data.status || null},
+        ${data.position},
+        ${data.sponsor || null},
+        ${data.subcommittee || null},
+        ${data.fiscal_note || false},
+        ${data.lsb || null},
+        ${data.url || null},
+        ${data.notes || null},
+        NOW(),
+        NOW()
+      ) RETURNING *
+    `;
 
     return NextResponse.json(result.rows[0], { status: 201 });
   } catch (error) {
