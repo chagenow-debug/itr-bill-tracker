@@ -106,16 +106,34 @@ export async function createBill(data: {
   return result.rows[0];
 }
 
-export async function updateBill(id: number, data: Partial<typeof createBill>) {
+export async function updateBill(id: number, data: any) {
+  // List of valid columns that can be updated
+  const validColumns = [
+    'bill_number', 'companion_bills', 'chamber', 'title', 'short_title',
+    'description', 'committee', 'committee_key', 'status', 'position',
+    'sponsor', 'subcommittee', 'fiscal_note', 'lsb', 'url', 'notes'
+  ];
+
   const fields = [];
   const values = [];
   let paramCount = 1;
 
+  // Only include valid columns and non-empty values
   Object.entries(data).forEach(([key, value]) => {
+    if (!validColumns.includes(key)) return; // Skip invalid columns
+
+    // Convert empty strings to null for optional fields
+    const finalValue = value === '' ? null : value;
+
     fields.push(`${key} = $${paramCount}`);
-    values.push(value);
+    values.push(finalValue);
     paramCount++;
   });
+
+  // If no valid fields to update, return the existing bill
+  if (fields.length === 0) {
+    return getBillById(id);
+  }
 
   fields.push(`updated_at = NOW()`);
   values.push(id);
