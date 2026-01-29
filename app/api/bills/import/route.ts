@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
           bill_number: bill.bill_number,
           companion_bills: bill.companion_bills,
           chamber: bill.chamber,
-          title: bill.bill_number,
+          title: bill.title,
           short_title: bill.short_title,
           description: bill.description,
           committee: bill.committee,
