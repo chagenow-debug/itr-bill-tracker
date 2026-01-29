@@ -1,17 +1,32 @@
-import { sql } from '@vercel/postgres';
+import { createClient } from '@vercel/postgres';
 
-// Vercel's @vercel/postgres handles connection pooling automatically
-// It uses DATABASE_PRISMA_DATABASE_URL or other pooled connection variants
-// No manual connection management needed
+// Create a single client instance for reuse
+let client: any = null;
+
+async function getClient() {
+  if (!client) {
+    console.log('[DB] Creating new Postgres client...');
+    client = createClient();
+    console.log('[DB] Client created, connecting...');
+    await client.connect();
+    console.log('[DB] Client connected successfully');
+  }
+  return client;
+}
 
 export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
   try {
+    const conn = await getClient();
     if (params && params.length > 0) {
-      return await sql.query(text, params);
+      console.log('[DB] Executing parameterized query');
+      return await conn.query(text, params);
     }
-    return await sql.query(text);
+    console.log('[DB] Executing simple query');
+    return await conn.query(text);
   } catch (error) {
     console.error('[DB] Query error:', error);
+    // Reset client on error so it tries to reconnect next time
+    client = null;
     throw error;
   }
 }
