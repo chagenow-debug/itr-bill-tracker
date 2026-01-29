@@ -614,8 +614,7 @@ export default function Home() {
         )}
 
         <div className="footer">
-          <p>Iowans for Tax Relief - A 501(c)(4) Organization Promoting Free Market Principles</p>
-          <p style={{ marginTop: "10px" }}>
+          <p>
             Data sourced from{" "}
             <a href="https://www.legis.iowa.gov">Iowa Legislature</a>
           </p>
