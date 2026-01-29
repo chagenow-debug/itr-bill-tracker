@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getAllBills, createBill } from "@/lib/db/client";
 import { validateSession } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const bills = await prisma.bills.findMany({
-      orderBy: { bill_number: 'asc' },
-    });
+    const bills = await getAllBills();
     return NextResponse.json(bills);
   } catch (error) {
     console.error("Error fetching bills:", error);
@@ -29,25 +27,23 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
 
-    const bill = await prisma.bills.create({
-      data: {
-        bill_number: data.bill_number,
-        companion_bills: data.companion_bills || null,
-        chamber: data.chamber,
-        title: data.title,
-        short_title: data.short_title,
-        description: data.description || null,
-        committee: data.committee || null,
-        committee_key: data.committee_key || null,
-        status: data.status || null,
-        position: data.position,
-        sponsor: data.sponsor || null,
-        subcommittee: data.subcommittee || null,
-        fiscal_note: data.fiscal_note || false,
-        lsb: data.lsb || null,
-        url: data.url || null,
-        notes: data.notes || null,
-      },
+    const bill = await createBill({
+      bill_number: data.bill_number,
+      companion_bills: data.companion_bills || undefined,
+      chamber: data.chamber,
+      title: data.title,
+      short_title: data.short_title,
+      description: data.description || undefined,
+      committee: data.committee || undefined,
+      committee_key: data.committee_key || undefined,
+      status: data.status || undefined,
+      position: data.position,
+      sponsor: data.sponsor || undefined,
+      subcommittee: data.subcommittee || undefined,
+      fiscal_note: data.fiscal_note || undefined,
+      lsb: data.lsb || undefined,
+      url: data.url || undefined,
+      notes: data.notes || undefined,
     });
 
     return NextResponse.json(bill, { status: 201 });

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { createBill } from "@/lib/db/client";
 import { validateSession } from "@/lib/auth";
 import Papa from "papaparse";
 
@@ -147,30 +147,28 @@ export async function POST(request: NextRequest) {
 
     for (const bill of bills) {
       try {
-        const result = await prisma.bills.create({
-          data: {
-            bill_number: bill.bill_number,
-            companion_bills: bill.companion_bills || null,
-            chamber: bill.chamber,
-            title: bill.title,
-            short_title: bill.short_title,
-            description: bill.description || null,
-            committee: bill.committee || null,
-            committee_key: bill.committee_key || null,
-            status: bill.status || null,
-            position: bill.position,
-            sponsor: bill.sponsor || null,
-            subcommittee: bill.subcommittee || null,
-            fiscal_note: bill.fiscal_note === 'true' || bill.fiscal_note === true || false,
-            lsb: bill.lsb || null,
-            url: null,
-            notes: bill.notes || null,
-          },
+        const result = await createBill({
+          bill_number: bill.bill_number,
+          companion_bills: bill.companion_bills,
+          chamber: bill.chamber,
+          title: bill.bill_number,
+          short_title: bill.short_title,
+          description: bill.description,
+          committee: bill.committee,
+          committee_key: bill.committee_key,
+          status: bill.status,
+          position: bill.position,
+          sponsor: bill.sponsor,
+          subcommittee: bill.subcommittee,
+          fiscal_note: bill.fiscal_note ? "true" : undefined,
+          lsb: bill.lsb,
+          url: bill.url,
+          notes: bill.notes,
         });
         insertedBills.push(result);
       } catch (error: any) {
         console.error(`Error inserting bill ${bill.bill_number}:`, error);
-        if (error.code === 'P2002') {
+        if (error.code === '23505') { // PostgreSQL unique constraint violation
           insertErrors.push(`Bill ${bill.bill_number}: Already exists in database`);
         } else {
           insertErrors.push(`Bill ${bill.bill_number}: ${error.message}`);

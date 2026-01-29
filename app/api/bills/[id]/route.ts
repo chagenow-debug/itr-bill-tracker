@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getBillById, updateBill, deleteBill } from "@/lib/db/client";
 import { validateSession } from "@/lib/auth";
 
 export async function GET(
@@ -8,9 +8,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const bill = await prisma.bills.findUnique({
-      where: { id: parseInt(id) },
-    });
+    const bill = await getBillById(parseInt(id));
 
     if (!bill) {
       return NextResponse.json(
@@ -45,20 +43,18 @@ export async function PUT(
     const { id } = await params;
     const data = await request.json();
 
-    const bill = await prisma.bills.update({
-      where: { id: parseInt(id) },
-      data,
-    });
+    const bill = await updateBill(parseInt(id), data);
 
-    return NextResponse.json(bill);
-  } catch (error: any) {
-    console.error("Error updating bill:", error);
-    if (error.code === 'P2025') {
+    if (!bill) {
       return NextResponse.json(
         { error: "Bill not found" },
         { status: 404 }
       );
     }
+
+    return NextResponse.json(bill);
+  } catch (error: any) {
+    console.error("Error updating bill:", error);
     return NextResponse.json(
       { error: "Failed to update bill" },
       { status: 500 }
@@ -80,9 +76,14 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await prisma.bills.delete({
-      where: { id: parseInt(id) },
-    });
+    const bill = await deleteBill(parseInt(id));
+
+    if (!bill) {
+      return NextResponse.json(
+        { error: "Bill not found" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(
       { message: "Bill deleted successfully" },
@@ -90,12 +91,6 @@ export async function DELETE(
     );
   } catch (error: any) {
     console.error("Error deleting bill:", error);
-    if (error.code === 'P2025') {
-      return NextResponse.json(
-        { error: "Bill not found" },
-        { status: 404 }
-      );
-    }
     return NextResponse.json(
       { error: "Failed to delete bill" },
       { status: 500 }
