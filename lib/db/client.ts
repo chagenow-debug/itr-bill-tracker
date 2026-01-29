@@ -13,7 +13,10 @@ export async function query(text: string, params?: (string | number | null)[]): 
     throw new Error('[DB] No database connection string found');
   }
 
-  const client = new Client({ connectionString });
+  const client = new Client({
+    connectionString,
+    ssl: { rejectUnauthorized: false },  // Required for Prisma Accelerate
+  });
 
   try {
     await client.connect();
