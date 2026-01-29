@@ -213,6 +213,7 @@ export default function Home() {
           border-radius: 8px;
           overflow: hidden;
           box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          table-layout: auto;
         }
 
         .bills-table thead {
@@ -257,8 +258,26 @@ export default function Home() {
         }
 
         .title-col {
-          flex: 1;
-          min-width: 250px;
+          width: 40%;
+          min-width: 300px;
+        }
+
+        .bills-table td:nth-child(4),
+        .bills-table th:nth-child(4) {
+          width: 120px;
+          min-width: 100px;
+        }
+
+        .bills-table td:nth-child(5),
+        .bills-table th:nth-child(5) {
+          width: 100px;
+          min-width: 80px;
+        }
+
+        .bills-table td:nth-child(6),
+        .bills-table th:nth-child(6) {
+          width: 120px;
+          min-width: 100px;
         }
 
         .bill-link {
