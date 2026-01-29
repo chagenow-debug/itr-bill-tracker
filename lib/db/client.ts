@@ -23,15 +23,20 @@ function getPool() {
 }
 
 export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
-  const pool = getPool();
-  const client = await pool.connect();
   try {
-    if (params && params.length > 0) {
-      return await client.query(text, params);
+    const pool = getPool();
+    const client = await pool.connect();
+    try {
+      if (params && params.length > 0) {
+        return await client.query(text, params);
+      }
+      return await client.query(text);
+    } finally {
+      client.release();
     }
-    return await client.query(text);
-  } finally {
-    client.release();
+  } catch (error) {
+    console.error('Database query error:', error);
+    throw error;
   }
 }
 
