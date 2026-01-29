@@ -43,32 +43,40 @@ export async function query(text: string, params?: (string | number | boolean | 
   }
 }
 
-// Ensure the is_pinned column exists
-let schemaInitialized = false;
-export async function ensureSchema() {
-  if (schemaInitialized) return;
-
-  try {
-    // Add is_pinned column if it doesn't exist
-    await query(
-      'ALTER TABLE bills ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT FALSE'
-    );
-    // Create index if it doesn't exist
-    await query(
-      'CREATE INDEX IF NOT EXISTS idx_bills_pinned ON bills(is_pinned DESC)'
-    );
-    schemaInitialized = true;
-  } catch (error) {
-    console.log('[DB] Schema check/init error (expected if already exists):', error);
-  }
-}
-
 export async function getAllBills() {
-  await ensureSchema();
-  const result = await query(
-    "SELECT * FROM bills ORDER BY is_pinned DESC, bill_number ASC"
-  );
-  return result.rows;
+  try {
+    // Try with is_pinned column first (handles new schema)
+    const result = await query(
+      "SELECT * FROM bills ORDER BY is_pinned DESC, bill_number ASC"
+    );
+    return result.rows;
+  } catch (error: any) {
+    // If is_pinned column doesn't exist, try to create it
+    if (error.message?.includes('is_pinned') || error.message?.includes('column') || error.code === '42703') {
+      try {
+        console.log('[DB] Creating is_pinned column...');
+        await query(
+          'ALTER TABLE bills ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT FALSE'
+        );
+        console.log('[DB] is_pinned column created');
+
+        // Retry the query with is_pinned
+        const result = await query(
+          "SELECT * FROM bills ORDER BY is_pinned DESC, bill_number ASC"
+        );
+        return result.rows;
+      } catch (alterError) {
+        console.log('[DB] Error creating column:', alterError);
+        // Fallback to query without is_pinned
+        const result = await query(
+          "SELECT * FROM bills ORDER BY bill_number ASC"
+        );
+        return result.rows;
+      }
+    }
+    // Re-throw if it's a different error
+    throw error;
+  }
 }
 
 export async function getBillById(id: number) {
