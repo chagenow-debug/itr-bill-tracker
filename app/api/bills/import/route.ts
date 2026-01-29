@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
             bill.position,
             bill.sponsor || null,
             bill.subcommittee || null,
-            bill.fiscal_note ? true : false,
+            (bill.fiscal_note ? true : false) as any,
             bill.lsb || null,
             null, // Always null for URL since CSV has no URLs
             bill.notes || null,
