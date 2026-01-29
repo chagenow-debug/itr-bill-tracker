@@ -5,9 +5,11 @@ const Client = pg.Client;
 // For serverless, create fresh client connection per query
 // This avoids pool state issues across function invocations
 export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
-  const connectionString = process.env.DATABASE_PRISMA_DATABASE_URL ||
+  // Prefer regular postgres:// connection string over prisma+postgres://
+  // The native pg module doesn't understand prisma+postgres:// URLs
+  const connectionString = process.env.DATABASE_URL ||
                          process.env.POSTGRES_PRISMA_URL ||
-                         process.env.DATABASE_URL;
+                         process.env.DATABASE_PRISMA_DATABASE_URL;
 
   if (!connectionString) {
     throw new Error('[DB] No database connection string found');
