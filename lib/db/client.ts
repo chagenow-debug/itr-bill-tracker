@@ -1,23 +1,52 @@
-import { sql } from '@vercel/postgres';
+import { createClient } from '@vercel/postgres';
 
-// @vercel/postgres automatically handles connection pooling
-// It respects the DATABASE_PRISMA_DATABASE_URL environment variable
-// which points to Prisma's accelerate pooling service
+// Manually create a client with explicit connection string
+// We use DATABASE_PRISMA_DATABASE_URL which is the pooled connection from Prisma
+let cachedClient: any = null;
+
+async function getClient() {
+  if (cachedClient) {
+    return cachedClient;
+  }
+
+  const connectionString = process.env.DATABASE_PRISMA_DATABASE_URL;
+
+  if (!connectionString) {
+    throw new Error('[DB] Missing DATABASE_PRISMA_DATABASE_URL');
+  }
+
+  console.log('[DB] Creating client with pooled connection...');
+  cachedClient = createClient({ connectionString });
+
+  try {
+    console.log('[DB] Connecting to database...');
+    await cachedClient.connect();
+    console.log('[DB] Successfully connected to database');
+  } catch (error) {
+    console.error('[DB] Connection error:', error);
+    cachedClient = null;
+    throw error;
+  }
+
+  return cachedClient;
+}
 
 export async function query(text: string, params?: (string | number | null)[]): Promise<any> {
   try {
+    const client = await getClient();
     if (params && params.length > 0) {
       console.log('[DB] Executing parameterized query');
-      const result = await sql.query(text, params);
+      const result = await client.query(text, params);
       console.log('[DB] Query succeeded');
       return result;
     }
     console.log('[DB] Executing simple query');
-    const result = await sql.query(text);
+    const result = await client.query(text);
     console.log('[DB] Query succeeded');
     return result;
   } catch (error) {
     console.error('[DB] Query error:', error);
+    cachedClient = null;  // Reset on error to force reconnect
     throw error;
   }
 }
