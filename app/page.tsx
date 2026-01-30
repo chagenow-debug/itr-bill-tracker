@@ -84,7 +84,16 @@ export default function Home() {
   };
 
   const pinnedBills = filteredBills.filter(bill => bill.is_pinned);
-  const unpinnedBills = filteredBills.filter(bill => !bill.is_pinned);
+  const unpinnedBills = filteredBills.filter(bill => !bill.is_pinned).sort((a, b) => {
+    // Sort so Monitor bills go to the bottom, others at top
+    const aIsMonitor = a.position === "Monitor" ? 1 : 0;
+    const bIsMonitor = b.position === "Monitor" ? 1 : 0;
+    if (aIsMonitor !== bIsMonitor) {
+      return aIsMonitor - bIsMonitor; // Monitor (1) comes after non-Monitor (0)
+    }
+    // For bills with same monitor status, maintain bill number order
+    return a.bill_number.localeCompare(b.bill_number);
+  });
 
   const renderBillsTable = (bills: Bill[], title: string, isPinned: boolean = false) => (
     <div style={{ marginBottom: "2rem" }}>
