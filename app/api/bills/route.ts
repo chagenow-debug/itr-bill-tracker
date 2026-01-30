@@ -11,6 +11,15 @@ function generateBillUrl(billNumber: string, gaNumber: string = "91"): string {
 
 export async function GET() {
   try {
+    // Require authentication for admin to access bills
+    const isAdmin = await validateSession();
+    if (!isAdmin) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const bills = await getAllBills();
     return NextResponse.json(bills);
   } catch (error) {
