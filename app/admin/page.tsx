@@ -48,17 +48,22 @@ export default function AdminPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const loadBills = async () => {
+    const checkAuthAndLoadBills = async () => {
       try {
-        // Fetch bills - will return 401 if not authenticated
-        const billsResponse = await fetch("/api/bills", {
+        // Check if authenticated first
+        const authResponse = await fetch("/api/auth/check", {
           credentials: "include",
         });
 
-        if (billsResponse.status === 401) {
+        if (authResponse.status === 401) {
           router.push("/admin/login");
           return;
         }
+
+        // Load bills if authenticated
+        const billsResponse = await fetch("/api/bills", {
+          credentials: "include",
+        });
 
         if (!billsResponse.ok) throw new Error("Failed to fetch bills");
         const data = await billsResponse.json();
@@ -69,7 +74,7 @@ export default function AdminPage() {
       }
     };
 
-    loadBills();
+    checkAuthAndLoadBills();
   }, [router]);
 
   const handleLogout = async () => {
