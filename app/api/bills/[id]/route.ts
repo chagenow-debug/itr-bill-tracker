@@ -33,7 +33,9 @@ export async function PUT(
 ) {
   try {
     const isAdmin = await validateSession();
+    console.log('[API] PUT /api/bills/[id] - isAdmin:', isAdmin);
     if (!isAdmin) {
+      console.log('[API] Unauthorized - no valid session');
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }

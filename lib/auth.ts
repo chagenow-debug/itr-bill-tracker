@@ -41,6 +41,8 @@ export async function validateSession(): Promise<boolean> {
   const cookieStore = await cookies();
   const token = cookieStore.get("admin_session")?.value;
 
+  console.log('[Auth] validateSession - token exists:', !!token);
+
   if (!token) {
     return false;
   }
