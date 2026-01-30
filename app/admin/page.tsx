@@ -232,11 +232,10 @@ export default function AdminPage() {
 
               <input
                 name="title"
-                placeholder="Full Title"
+                placeholder="Full Title (optional - will default to Short Title)"
                 value={formData.title}
                 onChange={handleInputChange}
                 className="border rounded px-3 py-2"
-                required
               />
 
               <input
@@ -364,7 +363,7 @@ export default function AdminPage() {
               {bills.map(bill => (
                 <tr key={bill.id} className="hover:bg-gray-50">
                   <td className="px-6 py-3 text-sm font-medium text-gray-900">{bill.bill_number}</td>
-                  <td className="px-6 py-3 text-sm text-gray-600">{bill.title}</td>
+                  <td className="px-6 py-3 text-sm text-gray-600">{bill.short_title}</td>
                   <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
                   <td className="px-6 py-3 text-sm">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${

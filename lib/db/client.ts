@@ -173,8 +173,8 @@ export async function updateBill(id: number, data: any) {
     'sponsor', 'subcommittee', 'fiscal_note', 'lsb', 'url', 'notes', 'is_pinned'
   ];
 
-  const fields = [];
-  const values = [];
+  const fields: string[] = [];
+  const values: any[] = [];
   let paramCount = 1;
 
   // Only include valid columns and non-empty values
@@ -194,11 +194,19 @@ export async function updateBill(id: number, data: any) {
     return getBillById(id);
   }
 
+  // If title is empty but short_title is provided, use short_title as title
+  if (!data.title && data.short_title && fields.some(f => f.includes('short_title'))) {
+    fields.push(`title = $${paramCount}`);
+    values.push(data.short_title);
+    paramCount++;
+  }
+
   fields.push(`updated_at = NOW()`);
   values.push(id);
+  paramCount++;
 
   const result = await query(
-    `UPDATE bills SET ${fields.join(", ")} WHERE id = $${paramCount} RETURNING *`,
+    `UPDATE bills SET ${fields.join(", ")} WHERE id = $${paramCount - 1} RETURNING *`,
     values
   );
   return result.rows[0];

@@ -37,11 +37,14 @@ export async function POST(request: NextRequest) {
     // Generate URL if not provided
     const billUrl = (data.url && data.url.trim() !== '') ? data.url : generateBillUrl(data.bill_number);
 
+    // Use short_title as title if title is not provided
+    const title = (data.title && data.title.trim() !== '') ? data.title : data.short_title;
+
     const bill = await createBill({
       bill_number: data.bill_number,
       companion_bills: data.companion_bills || undefined,
       chamber: data.chamber,
-      title: data.title,
+      title: title,
       short_title: data.short_title,
       description: data.description || undefined,
       committee: data.committee || undefined,
