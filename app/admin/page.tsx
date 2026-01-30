@@ -12,6 +12,15 @@ interface Bill {
   chamber: string;
   status?: string;
   sponsor?: string;
+  description?: string;
+  committee?: string;
+  committee_key?: string;
+  subcommittee?: string;
+  fiscal_note?: string;
+  lsb?: string;
+  url?: string;
+  notes?: string;
+  is_pinned?: boolean;
 }
 
 export default function AdminPage() {
@@ -30,7 +39,7 @@ export default function AdminPage() {
     committee: "",
     committee_key: "",
     subcommittee: "",
-    fiscal_note: false,
+    fiscal_note: "",
     lsb: "",
     url: "",
     notes: "",
@@ -117,7 +126,7 @@ export default function AdminPage() {
         committee: "",
         committee_key: "",
         subcommittee: "",
-        fiscal_note: false,
+        fiscal_note: "",
         lsb: "",
         url: "",
         notes: "",
@@ -130,7 +139,25 @@ export default function AdminPage() {
 
   const handleEdit = (bill: Bill) => {
     setEditingId(bill.id);
-    setFormData({ ...bill, fiscal_note: false } as any);
+    setFormData({
+      ...bill,
+      // Ensure all fields have proper default values
+      chamber: bill.chamber || "House",
+      position: bill.position || "Undecided",
+      title: bill.title || "",
+      short_title: bill.short_title || "",
+      status: bill.status || "",
+      sponsor: bill.sponsor || "",
+      description: bill.description || "",
+      committee: bill.committee || "",
+      committee_key: bill.committee_key || "",
+      subcommittee: bill.subcommittee || "",
+      fiscal_note: bill.fiscal_note || "",
+      lsb: bill.lsb || "",
+      url: bill.url || "",
+      notes: bill.notes || "",
+      is_pinned: bill.is_pinned || false,
+    } as any);
     setShowForm(true);
   };
 
@@ -184,7 +211,7 @@ export default function AdminPage() {
                 committee: "",
                 committee_key: "",
                 subcommittee: "",
-                fiscal_note: false,
+                fiscal_note: "",
                 lsb: "",
                 url: "",
                 notes: "",
@@ -298,6 +325,23 @@ export default function AdminPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <input
+                  name="committee_key"
+                  placeholder="Committee Key"
+                  value={formData.committee_key}
+                  onChange={handleInputChange}
+                  className="border rounded px-3 py-2"
+                />
+                <input
+                  name="subcommittee"
+                  placeholder="Subcommittee"
+                  value={formData.subcommittee}
+                  onChange={handleInputChange}
+                  className="border rounded px-3 py-2"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <input
                   name="url"
                   type="url"
                   placeholder="Bill URL"
@@ -313,6 +357,14 @@ export default function AdminPage() {
                   className="border rounded px-3 py-2"
                 />
               </div>
+
+              <input
+                name="fiscal_note"
+                placeholder="Fiscal Note"
+                value={formData.fiscal_note}
+                onChange={handleInputChange}
+                className="border rounded px-3 py-2"
+              />
 
               <textarea
                 name="notes"
