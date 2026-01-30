@@ -206,10 +206,11 @@ export async function updateBill(id: number, data: any) {
   values.push(id);
   paramCount++;
 
-  const result = await query(
-    `UPDATE bills SET ${fields.join(", ")} WHERE id = $${paramCount - 1} RETURNING *`,
-    values
-  );
+  const sql = `UPDATE bills SET ${fields.join(", ")} WHERE id = $${paramCount - 1} RETURNING *`;
+  console.log('[DB] updateBill SQL:', sql);
+  console.log('[DB] updateBill values:', values);
+
+  const result = await query(sql, values);
   return result.rows[0];
 }
 

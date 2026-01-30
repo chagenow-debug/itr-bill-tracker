@@ -102,7 +102,10 @@ export default function AdminPage() {
         credentials: "include",
       });
 
-      if (!response.ok) throw new Error("Failed to save bill");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || "Failed to save bill");
+      }
 
       const savedBill = await response.json();
 
@@ -132,8 +135,9 @@ export default function AdminPage() {
         notes: "",
         is_pinned: false,
       });
-    } catch (error) {
-      alert("Error saving bill");
+    } catch (error: any) {
+      console.error("Error saving bill:", error);
+      alert("Error saving bill: " + (error.message || "Unknown error"));
     }
   };
 
