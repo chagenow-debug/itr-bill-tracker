@@ -55,8 +55,11 @@ export async function PUT(
     return NextResponse.json(bill);
   } catch (error: any) {
     console.error("Error updating bill:", error);
+    console.error("Error message:", error.message);
+    console.error("Error code:", error.code);
+    console.error("Error detail:", error.detail);
     return NextResponse.json(
-      { error: "Failed to update bill" },
+      { error: "Failed to update bill", details: error.message },
       { status: 500 }
     );
   }

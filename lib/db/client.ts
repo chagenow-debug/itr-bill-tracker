@@ -177,30 +177,41 @@ export async function updateBill(id: number, data: any) {
   const values: any[] = [];
   let paramCount = 1;
 
-  // Only include valid columns and non-empty values
-  Object.entries(data).forEach(([key, value]) => {
-    if (!validColumns.includes(key)) return; // Skip invalid columns
+  // Build the update fields
+  for (const [key, value] of Object.entries(data)) {
+    if (!validColumns.includes(key)) continue; // Skip invalid columns
 
-    // Convert empty strings to null for optional fields
+    // Convert empty strings to null
     const finalValue = value === '' ? null : value;
 
     fields.push(`${key} = $${paramCount}`);
     values.push(finalValue);
     paramCount++;
-  });
+  }
 
   // If no valid fields to update, return the existing bill
   if (fields.length === 0) {
     return getBillById(id);
   }
 
-  // If title is empty but short_title is provided, use short_title as title
-  if (!data.title && data.short_title && fields.some(f => f.includes('short_title'))) {
-    fields.push(`title = $${paramCount}`);
-    values.push(data.short_title);
-    paramCount++;
+  // If title wasn't in the data or is empty, but short_title is provided, auto-set title
+  if ((data.title === '' || data.title === undefined) && data.short_title && data.short_title.trim() !== '') {
+    // Check if title is already in the fields to update
+    const titleIndex = fields.findIndex(f => f.startsWith('title = '));
+    if (titleIndex >= 0) {
+      // Replace the existing title field
+      fields[titleIndex] = `title = $${paramCount}`;
+      values[titleIndex] = data.short_title;
+      paramCount++;
+    } else {
+      // Add title field
+      fields.push(`title = $${paramCount}`);
+      values.push(data.short_title);
+      paramCount++;
+    }
   }
 
+  // Add updated_at
   fields.push(`updated_at = NOW()`);
   values.push(id);
   paramCount++;
