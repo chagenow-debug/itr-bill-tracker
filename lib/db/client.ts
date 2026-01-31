@@ -244,6 +244,9 @@ export async function upsertBill(data: {
   // Auto-generate URL if not provided
   const billUrl = (data.url && data.url.trim() !== '') ? data.url : generateBillUrl(data.bill_number);
 
+  // Capitalize short_title: first word only
+  const capitalizedShortTitle = data.short_title.charAt(0).toUpperCase() + data.short_title.slice(1).toLowerCase();
+
   // PostgreSQL UPSERT: INSERT ... ON CONFLICT ... DO UPDATE
   // Preserve is_pinned and fiscal_note from existing record if not explicitly provided
   const result = await query(
@@ -278,7 +281,7 @@ export async function upsertBill(data: {
       data.companion_bills || null,
       data.chamber,
       data.title,
-      data.short_title,
+      capitalizedShortTitle,
       data.description || null,
       data.committee || null,
       data.committee_key || null,
