@@ -245,6 +245,7 @@ export async function upsertBill(data: {
   const billUrl = (data.url && data.url.trim() !== '') ? data.url : generateBillUrl(data.bill_number);
 
   // PostgreSQL UPSERT: INSERT ... ON CONFLICT ... DO UPDATE
+  // Preserve is_pinned and fiscal_note from existing record if not explicitly provided
   const result = await query(
     `INSERT INTO bills (
       bill_number, companion_bills, chamber, title, short_title, description,
@@ -265,11 +266,11 @@ export async function upsertBill(data: {
       position = $10,
       sponsor = $11,
       subcommittee = $12,
-      fiscal_note = $13,
+      fiscal_note = COALESCE($13, bills.fiscal_note),
       lsb = $14,
       url = $15,
       notes = $16,
-      is_pinned = $17,
+      is_pinned = COALESCE(NULLIF($17::text, 'false')::boolean, bills.is_pinned, false),
       updated_at = NOW()
     RETURNING *`,
     [
@@ -289,7 +290,7 @@ export async function upsertBill(data: {
       data.lsb || null,
       billUrl,
       data.notes || null,
-      data.is_pinned || false,
+      data.is_pinned === undefined ? null : data.is_pinned,
     ]
   );
   return result.rows[0];
