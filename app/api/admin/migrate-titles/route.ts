@@ -12,14 +12,19 @@ export async function GET() {
   try {
     console.log("[migrate-titles] Starting migration...");
 
-    // Use SQL-level transformation to capitalize all short_titles
-    // Format: first letter uppercase, rest lowercase
+    // First, check what titles we have
+    const checkBefore = await query("SELECT COUNT(*) as count FROM bills WHERE short_title IS NOT NULL AND short_title != ''");
+    console.log("[migrate-titles] Found", checkBefore.rows[0].count, "bills to process");
+
+    // Sample before
+    const sampleBefore = await query("SELECT id, short_title FROM bills WHERE short_title IS NOT NULL AND short_title != '' LIMIT 5");
+    console.log("[migrate-titles] Sample before:", sampleBefore.rows);
+
+    // Use PostgreSQL string functions for capitalization
+    // || is concatenation, UPPER/LOWER are functions, SUBSTRING is substr function
     const updateResult = await query(`
       UPDATE bills
-      SET short_title = CONCAT(
-        UPPER(LEFT(short_title, 1)),
-        LOWER(SUBSTRING(short_title, 2))
-      ),
+      SET short_title = UPPER(SUBSTRING(short_title, 1, 1)) || LOWER(SUBSTRING(short_title, 2)),
           updated_at = NOW()
       WHERE short_title IS NOT NULL
         AND short_title != ''
@@ -28,15 +33,14 @@ export async function GET() {
 
     const updated = updateResult.rows.length;
     console.log("[migrate-titles] Migration complete. Updated", updated, "bills");
-
-    // Get before/after samples
-    const allBills = await query("SELECT id, short_title FROM bills WHERE short_title IS NOT NULL LIMIT 5");
+    console.log("[migrate-titles] Sample after:", updateResult.rows.slice(0, 5));
 
     return NextResponse.json(
       {
         message: "Migration complete",
         updated,
-        sample: allBills.rows,
+        sampleBefore: sampleBefore.rows,
+        sampleAfter: updateResult.rows.slice(0, 5),
         note: "All short_title values have been capitalized (first word only)"
       },
       { status: 200 }
