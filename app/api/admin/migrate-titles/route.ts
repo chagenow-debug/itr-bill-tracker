@@ -41,7 +41,7 @@ export async function GET() {
         updated,
         sampleBefore: sampleBefore.rows,
         sampleAfter: updateResult.rows.slice(0, 5),
-        note: "All short_title values have been capitalized (first word only)"
+        note: "All short_title values have been converted to Title Case (First Letter Of Each Word Capitalized)"
       },
       { status: 200 }
     );
