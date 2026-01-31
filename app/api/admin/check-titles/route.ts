@@ -16,11 +16,11 @@ export async function GET() {
       LIMIT 20
     `);
 
-    const titles = result.rows;
+    const titles = result.rows as any[];
     console.log("[check-titles] Found", titles.length, "titles");
 
     // Analyze the titles to see what pattern they're in
-    const analysis = titles.map(t => ({
+    const analysis = titles.map((t: any) => ({
       id: t.id,
       bill_number: t.bill_number,
       short_title: t.short_title,
