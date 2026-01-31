@@ -10,52 +10,46 @@ import { query } from "@/lib/db/client";
  */
 export async function GET() {
   try {
-
     console.log("[migrate-titles] Starting migration...");
 
-    // Get all bills with a short_title value
-    const result = await query("SELECT id, short_title FROM bills WHERE short_title IS NOT NULL AND short_title != ''");
-    const bills = result.rows;
-    console.log("[migrate-titles] Found", bills.length, "bills with short_title");
+    // Use SQL-level transformation to capitalize all short_titles
+    // Format: first letter uppercase, rest lowercase
+    const updateResult = await query(`
+      UPDATE bills
+      SET short_title = CONCAT(
+        UPPER(LEFT(short_title, 1)),
+        LOWER(SUBSTRING(short_title, 2))
+      ),
+          updated_at = NOW()
+      WHERE short_title IS NOT NULL
+        AND short_title != ''
+      RETURNING id, short_title
+    `);
 
-    let updated = 0;
-    const changes = [];
-
-    // Process each bill
-    for (const bill of bills) {
-      if (!bill.short_title) continue;
-
-      const newTitle = bill.short_title.charAt(0).toUpperCase() + bill.short_title.slice(1).toLowerCase();
-
-      // Update ALL bills, not just ones that changed
-      console.log(`[migrate-titles] Updating bill ${bill.id}: "${bill.short_title}" -> "${newTitle}"`);
-      await query(
-        "UPDATE bills SET short_title = $1, updated_at = NOW() WHERE id = $2",
-        [newTitle, bill.id]
-      );
-      updated++;
-      changes.push({
-        id: bill.id,
-        from: bill.short_title,
-        to: newTitle,
-      });
-    }
-
+    const updated = updateResult.rows.length;
     console.log("[migrate-titles] Migration complete. Updated", updated, "bills");
+
+    // Get before/after samples
+    const allBills = await query("SELECT id, short_title FROM bills WHERE short_title IS NOT NULL LIMIT 5");
 
     return NextResponse.json(
       {
         message: "Migration complete",
         updated,
-        changes: changes.slice(0, 10), // Show first 10 changes
-        moreChanges: updated > 10 ? `... and ${updated - 10} more` : undefined,
+        sample: allBills.rows,
+        note: "All short_title values have been capitalized (first word only)"
       },
       { status: 200 }
     );
   } catch (error: any) {
     console.error("[migrate-titles] Error:", error);
+    console.error("[migrate-titles] Full error:", JSON.stringify(error, null, 2));
     return NextResponse.json(
-      { error: "Migration failed", details: error.message },
+      {
+        error: "Migration failed",
+        details: error.message,
+        code: error.code
+      },
       { status: 500 }
     );
   }
