@@ -20,11 +20,17 @@ export async function GET() {
     const sampleBefore = await query("SELECT id, short_title FROM bills WHERE short_title IS NOT NULL AND short_title != '' LIMIT 5");
     console.log("[migrate-titles] Sample before:", sampleBefore.rows);
 
-    // Use PostgreSQL string functions for capitalization
-    // || is concatenation, UPPER/LOWER are functions, SUBSTRING is substr function
+    // Use PostgreSQL to convert to title case (capitalize first letter of each word)
+    // Split on spaces, capitalize each word
     const updateResult = await query(`
       UPDATE bills
-      SET short_title = UPPER(SUBSTRING(short_title, 1, 1)) || LOWER(SUBSTRING(short_title, 2)),
+      SET short_title = (
+        SELECT STRING_AGG(
+          UPPER(SUBSTRING(word, 1, 1)) || LOWER(SUBSTRING(word, 2)),
+          ' '
+        )
+        FROM UNNEST(STRING_TO_ARRAY(short_title, ' ')) AS word
+      ),
           updated_at = NOW()
       WHERE short_title IS NOT NULL
         AND short_title != ''

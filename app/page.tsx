@@ -136,7 +136,6 @@ export default function Home() {
                     </td>
                     <td className="title-col">
                       <div className="short-title">{bill.short_title}</div>
-                      <div className="full-title">{bill.title}</div>
                     </td>
                     <td>
                       {bill.committee ? (
