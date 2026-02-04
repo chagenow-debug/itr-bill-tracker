@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 interface Bill {
   id: number;
   bill_number: string;
+  companion_bills?: string;
   title: string;
   short_title: string;
   position: "Support" | "Against" | "Monitor" | "Undecided";
@@ -29,6 +30,7 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     bill_number: "",
+    companion_bills: "",
     title: "",
     short_title: "",
     chamber: "House",
@@ -124,6 +126,7 @@ export default function AdminPage() {
       setEditingId(null);
       setFormData({
         bill_number: "",
+        companion_bills: "",
         title: "",
         short_title: "",
         chamber: "House",
@@ -153,6 +156,8 @@ export default function AdminPage() {
       // Ensure all fields have proper default values
       chamber: bill.chamber || "House",
       position: bill.position || "Undecided",
+      bill_number: bill.bill_number || "",
+      companion_bills: bill.companion_bills || "",
       title: bill.title || "",
       short_title: bill.short_title || "",
       status: bill.status || "",
@@ -210,6 +215,7 @@ export default function AdminPage() {
               setEditingId(null);
               setFormData({
                 bill_number: "",
+                companion_bills: "",
                 title: "",
                 short_title: "",
                 chamber: "House",
@@ -265,6 +271,14 @@ export default function AdminPage() {
                   <option>Senate</option>
                 </select>
               </div>
+
+              <input
+                name="companion_bills"
+                placeholder="Companion Bills (e.g., SF 456, HJ 789 - comma separated)"
+                value={formData.companion_bills}
+                onChange={handleInputChange}
+                className="border rounded px-3 py-2"
+              />
 
               <input
                 name="title"

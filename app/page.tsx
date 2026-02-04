@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 interface Bill {
   id: number;
   bill_number: string;
+  companion_bills?: string;
   title: string;
   short_title: string;
   position: "Support" | "Against" | "Monitor" | "Undecided";
@@ -130,9 +131,20 @@ export default function Home() {
                       </button>
                     </td>
                     <td className="bill-number-col">
-                      <a href={bill.url || "#"} target="_blank" rel="noopener noreferrer" className="bill-link">
-                        {bill.bill_number}
-                      </a>
+                      <div>
+                        <a href={bill.url || "#"} target="_blank" rel="noopener noreferrer" className="bill-link">
+                          {bill.bill_number}
+                        </a>
+                      </div>
+                      {bill.companion_bills && (
+                        <div className="companion-bills">
+                          {bill.companion_bills.split(',').map((companion, idx) => (
+                            <div key={idx} style={{ fontSize: "0.85em", color: "#666", marginTop: "3px" }}>
+                              {companion.trim()}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </td>
                     <td className="title-col">
                       <div className="short-title">{bill.short_title}</div>
@@ -195,14 +207,19 @@ export default function Home() {
         }
 
         html, body {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           background: #f8fafb;
           min-height: 100vh;
           color: #333;
         }
 
+        h1, h2, h3, h4, h5, h6 {
+          font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          font-weight: 700;
+        }
+
         .header {
-          background: linear-gradient(90deg, #1e40af 0%, #1e3a8a 100%);
+          background: linear-gradient(90deg, #011689 0%, #010a4a 100%);
           padding: 20px 30px;
           display: flex;
           justify-content: space-between;
@@ -289,12 +306,12 @@ export default function Home() {
         .filter-group select:focus,
         .filter-group input:focus {
           outline: none;
-          border-color: #1e40af;
+          border-color: #011689;
           box-shadow: 0 0 3px rgba(30, 64, 175, 0.3);
         }
 
         .admin-btn {
-          background: #1e40af;
+          background: #011689;
           color: white;
           border: none;
           padding: 8px 20px;
@@ -307,7 +324,7 @@ export default function Home() {
         }
 
         .admin-btn:hover {
-          background: #1e3a8a;
+          background: #010a4a;
         }
 
         .bills-table {
@@ -321,7 +338,7 @@ export default function Home() {
         }
 
         .bills-table thead {
-          background: #1e40af;
+          background: #011689;
         }
 
         .bills-table th {
@@ -366,7 +383,7 @@ export default function Home() {
         .bill-number-col {
           width: 90px;
           font-weight: 600;
-          color: #1565c0;
+          color: #011689;
         }
 
         .title-col {
@@ -393,7 +410,7 @@ export default function Home() {
         }
 
         .bill-link {
-          color: #1565c0;
+          color: #011689;
           text-decoration: none;
           font-weight: 600;
         }
@@ -463,14 +480,14 @@ export default function Home() {
           border-radius: 10px;
           font-size: 0.75em;
           background: #e3f2fd;
-          color: #1565c0;
+          color: #011689;
           border: 1px solid #90caf9;
         }
 
         .expand-btn {
           background: none;
           border: none;
-          color: #1565c0;
+          color: #011689;
           cursor: pointer;
           font-size: 1.2em;
           transition: transform 0.2s;
@@ -537,7 +554,7 @@ export default function Home() {
         }
 
         .footer a {
-          color: #1565c0;
+          color: #011689;
           text-decoration: none;
         }
 
