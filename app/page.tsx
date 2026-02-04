@@ -135,8 +135,13 @@ export default function Home() {
                       <a href={bill.url || "#"} target="_blank" rel="noopener noreferrer" className="bill-link">
                         {bill.bill_number}
                       </a>
+                      {bill.previous_bill_number && (
+                        <div style={{ fontSize: "0.8em", color: "#999", marginTop: "3px" }}>
+                          Previous: {bill.previous_bill_number}
+                        </div>
+                      )}
                       {bill.companion_bills && (
-                        <div style={{ fontSize: "0.8em", color: "#999", marginTop: "4px" }}>
+                        <div style={{ fontSize: "0.8em", color: "#999", marginTop: "3px" }}>
                           Companion: {bill.companion_bills}
                         </div>
                       )}
