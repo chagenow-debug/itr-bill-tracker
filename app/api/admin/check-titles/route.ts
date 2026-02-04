@@ -26,7 +26,7 @@ export async function GET() {
       short_title: t.short_title,
       isAllCaps: t.short_title === t.short_title.toUpperCase(),
       isCapitalized: t.short_title.charAt(0) === t.short_title.charAt(0).toUpperCase() && t.short_title.slice(1) === t.short_title.slice(1).toLowerCase(),
-    }));
+    } as any));
 
     return NextResponse.json(
       {
