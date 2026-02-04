@@ -181,7 +181,7 @@ export async function createBill(data: {
 export async function updateBill(id: number, data: any) {
   // List of valid columns that can be updated
   const validColumns = [
-    'bill_number', 'companion_bills', 'chamber', 'title', 'short_title',
+    'bill_number', 'companion_bills', 'previous_bill_number', 'chamber', 'title', 'short_title',
     'description', 'committee', 'committee_key', 'status', 'position',
     'sponsor', 'subcommittee', 'fiscal_note', 'lsb', 'url', 'notes', 'is_pinned'
   ];
