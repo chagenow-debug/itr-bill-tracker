@@ -15,14 +15,14 @@ export async function GET() {
       ORDER BY ordinal_position
     `);
 
-    const columns = result.rows;
+    const columns = result.rows as any[];
     console.log("[check-columns] Found", columns.length, "columns");
 
     return NextResponse.json(
       {
         total: columns.length,
-        columns: columns.map(c => ({ name: c.column_name, type: c.data_type })),
-        hasPreviousBillNumber: columns.some(c => c.column_name === 'previous_bill_number'),
+        columns: columns.map((c: any) => ({ name: c.column_name, type: c.data_type })),
+        hasPreviousBillNumber: columns.some((c: any) => c.column_name === 'previous_bill_number'),
       },
       { status: 200 }
     );
