@@ -195,7 +195,9 @@ export default function AdminPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <>
+      <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+      <main className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -490,5 +492,6 @@ export default function AdminPage() {
         </div>
       </div>
     </main>
+    </>
   );
 }
