@@ -131,18 +131,12 @@ export default function Home() {
                       </button>
                     </td>
                     <td className="bill-number-col">
-                      <div>
-                        <a href={bill.url || "#"} target="_blank" rel="noopener noreferrer" className="bill-link">
-                          {bill.bill_number}
-                        </a>
-                      </div>
+                      <a href={bill.url || "#"} target="_blank" rel="noopener noreferrer" className="bill-link">
+                        {bill.bill_number}
+                      </a>
                       {bill.companion_bills && (
-                        <div className="companion-bills">
-                          {bill.companion_bills.split(',').map((companion, idx) => (
-                            <div key={idx} style={{ fontSize: "0.85em", color: "#666", marginTop: "3px" }}>
-                              {companion.trim()}
-                            </div>
-                          ))}
+                        <div style={{ fontSize: "0.8em", color: "#999", marginTop: "4px" }}>
+                          Companion: {bill.companion_bills}
                         </div>
                       )}
                     </td>

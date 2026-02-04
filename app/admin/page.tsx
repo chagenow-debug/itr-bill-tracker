@@ -274,7 +274,7 @@ export default function AdminPage() {
 
               <input
                 name="companion_bills"
-                placeholder="Companion Bills (e.g., SF 456, HJ 789 - comma separated)"
+                placeholder="Companion Bill Number (e.g., SF 456) - reference to related chamber version"
                 value={formData.companion_bills}
                 onChange={handleInputChange}
                 className="border rounded px-3 py-2"
