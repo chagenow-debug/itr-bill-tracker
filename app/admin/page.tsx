@@ -7,6 +7,7 @@ interface Bill {
   id: number;
   bill_number: string;
   companion_bills?: string;
+  previous_bill_number?: string;
   title: string;
   short_title: string;
   position: "Support" | "Against" | "Monitor" | "Undecided";
@@ -31,6 +32,7 @@ export default function AdminPage() {
   const [formData, setFormData] = useState({
     bill_number: "",
     companion_bills: "",
+    previous_bill_number: "",
     title: "",
     short_title: "",
     chamber: "House",
@@ -127,6 +129,7 @@ export default function AdminPage() {
       setFormData({
         bill_number: "",
         companion_bills: "",
+        previous_bill_number: "",
         title: "",
         short_title: "",
         chamber: "House",
@@ -158,6 +161,7 @@ export default function AdminPage() {
       position: bill.position || "Undecided",
       bill_number: bill.bill_number || "",
       companion_bills: bill.companion_bills || "",
+      previous_bill_number: bill.previous_bill_number || "",
       title: bill.title || "",
       short_title: bill.short_title || "",
       status: bill.status || "",
@@ -216,6 +220,7 @@ export default function AdminPage() {
               setFormData({
                 bill_number: "",
                 companion_bills: "",
+                previous_bill_number: "",
                 title: "",
                 short_title: "",
                 chamber: "House",
@@ -276,6 +281,14 @@ export default function AdminPage() {
                 name="companion_bills"
                 placeholder="Companion Bill Number (e.g., SF 456) - reference to related chamber version"
                 value={formData.companion_bills}
+                onChange={handleInputChange}
+                className="border rounded px-3 py-2"
+              />
+
+              <input
+                name="previous_bill_number"
+                placeholder="Previous Bill Number (e.g., HSB 123 -> HF 123) - bill renumbering"
+                value={formData.previous_bill_number}
                 onChange={handleInputChange}
                 className="border rounded px-3 py-2"
               />

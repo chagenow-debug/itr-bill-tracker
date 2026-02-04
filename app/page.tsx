@@ -6,6 +6,7 @@ interface Bill {
   id: number;
   bill_number: string;
   companion_bills?: string;
+  previous_bill_number?: string;
   title: string;
   short_title: string;
   position: "Support" | "Against" | "Monitor" | "Undecided";
