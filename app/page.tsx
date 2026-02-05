@@ -17,6 +17,7 @@ interface Bill {
   committee?: string;
   description?: string;
   is_pinned?: boolean;
+  section_pin_order?: number;
 }
 
 export default function Home() {
@@ -85,13 +86,34 @@ export default function Home() {
     }
   };
 
-  const priorityBills = filteredBills.filter(bill => bill.is_pinned);
+  const priorityBills = filteredBills.filter(bill => bill.is_pinned)
+    .sort((a, b) => {
+      // Sort by section_pin_order first (pinned items), then by bill_number
+      if ((a.section_pin_order ?? 999) !== (b.section_pin_order ?? 999)) {
+        return (a.section_pin_order ?? 999) - (b.section_pin_order ?? 999);
+      }
+      return a.bill_number.localeCompare(b.bill_number);
+    });
+
   const registrationBills = filteredBills.filter(
     bill => !bill.is_pinned && bill.position !== "Monitor"
-  ).sort((a, b) => a.bill_number.localeCompare(b.bill_number));
+  ).sort((a, b) => {
+    // Sort by section_pin_order first (pinned items), then by bill_number
+    if ((a.section_pin_order ?? 999) !== (b.section_pin_order ?? 999)) {
+      return (a.section_pin_order ?? 999) - (b.section_pin_order ?? 999);
+    }
+    return a.bill_number.localeCompare(b.bill_number);
+  });
+
   const monitoringBills = filteredBills.filter(
     bill => !bill.is_pinned && bill.position === "Monitor"
-  ).sort((a, b) => a.bill_number.localeCompare(b.bill_number));
+  ).sort((a, b) => {
+    // Sort by section_pin_order first (pinned items), then by bill_number
+    if ((a.section_pin_order ?? 999) !== (b.section_pin_order ?? 999)) {
+      return (a.section_pin_order ?? 999) - (b.section_pin_order ?? 999);
+    }
+    return a.bill_number.localeCompare(b.bill_number);
+  });
 
   const renderBillsTable = (bills: Bill[], title: string, isPinned: boolean = false) => (
     <div style={{ marginBottom: "2rem" }}>

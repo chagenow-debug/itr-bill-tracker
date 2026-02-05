@@ -23,6 +23,7 @@ interface Bill {
   url?: string;
   notes?: string;
   is_pinned?: boolean;
+  section_pin_order?: number;
 }
 
 export default function AdminPage() {
@@ -48,6 +49,7 @@ export default function AdminPage() {
     url: "",
     notes: "",
     is_pinned: false,
+    section_pin_order: undefined as number | undefined,
   });
   const router = useRouter();
 
@@ -145,6 +147,7 @@ export default function AdminPage() {
         url: "",
         notes: "",
         is_pinned: false,
+        section_pin_order: undefined,
       });
     } catch (error: any) {
       console.error("Error saving bill:", error);
@@ -175,6 +178,7 @@ export default function AdminPage() {
       url: bill.url || "",
       notes: bill.notes || "",
       is_pinned: bill.is_pinned || false,
+      section_pin_order: bill.section_pin_order,
     } as any);
     setShowForm(true);
   };
@@ -238,6 +242,7 @@ export default function AdminPage() {
                 url: "",
                 notes: "",
                 is_pinned: false,
+                section_pin_order: undefined,
               });
             }}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -432,6 +437,16 @@ export default function AdminPage() {
                   Pin as ITR Priority Bill
                 </label>
               </div>
+
+              <input
+                type="number"
+                name="section_pin_order"
+                placeholder="Section Pin Order (1 = top, leave empty to not pin within section)"
+                value={formData.section_pin_order ?? ""}
+                onChange={handleInputChange}
+                className="border rounded px-3 py-2"
+                min="1"
+              />
 
               <button
                 type="submit"
