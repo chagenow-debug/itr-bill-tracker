@@ -86,34 +86,36 @@ export default function Home() {
     }
   };
 
-  const priorityBills = filteredBills.filter(bill => bill.is_pinned)
-    .sort((a, b) => {
-      // Sort by section_pin_order first (pinned items), then by bill_number
+  // Helper function to sort bills with companion grouping
+  const sortBillsWithCompanions = (billsToSort: Bill[]) => {
+    return billsToSort.sort((a, b) => {
+      // Sort by section_pin_order first (pinned items)
       if ((a.section_pin_order ?? 999) !== (b.section_pin_order ?? 999)) {
         return (a.section_pin_order ?? 999) - (b.section_pin_order ?? 999);
       }
+
+      // Check if bills are companions (same position) - if so, keep them together
+      if (a.companion_bills && a.companion_bills.includes(b.bill_number)) {
+        return a.bill_number.localeCompare(b.bill_number);
+      }
+      if (b.companion_bills && b.companion_bills.includes(a.bill_number)) {
+        return a.bill_number.localeCompare(b.bill_number);
+      }
+
+      // Otherwise sort by bill_number
       return a.bill_number.localeCompare(b.bill_number);
     });
+  };
 
-  const registrationBills = filteredBills.filter(
-    bill => !bill.is_pinned && bill.position !== "Monitor"
-  ).sort((a, b) => {
-    // Sort by section_pin_order first (pinned items), then by bill_number
-    if ((a.section_pin_order ?? 999) !== (b.section_pin_order ?? 999)) {
-      return (a.section_pin_order ?? 999) - (b.section_pin_order ?? 999);
-    }
-    return a.bill_number.localeCompare(b.bill_number);
-  });
+  const priorityBills = sortBillsWithCompanions(filteredBills.filter(bill => bill.is_pinned));
 
-  const monitoringBills = filteredBills.filter(
-    bill => !bill.is_pinned && bill.position === "Monitor"
-  ).sort((a, b) => {
-    // Sort by section_pin_order first (pinned items), then by bill_number
-    if ((a.section_pin_order ?? 999) !== (b.section_pin_order ?? 999)) {
-      return (a.section_pin_order ?? 999) - (b.section_pin_order ?? 999);
-    }
-    return a.bill_number.localeCompare(b.bill_number);
-  });
+  const registrationBills = sortBillsWithCompanions(
+    filteredBills.filter(bill => !bill.is_pinned && bill.position !== "Monitor")
+  );
+
+  const monitoringBills = sortBillsWithCompanions(
+    filteredBills.filter(bill => !bill.is_pinned && bill.position === "Monitor")
+  );
 
   const renderBillsTable = (bills: Bill[], title: string, isPinned: boolean = false) => (
     <div style={{ marginBottom: "2rem" }}>
