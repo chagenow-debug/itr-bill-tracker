@@ -484,7 +484,7 @@ export default function AdminPage() {
                   <tbody className="divide-y">
                     {priorityBills.map(bill => (
                       <tr key={bill.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-3 text-sm font-medium text-gray-900">{bill.bill_number}</td>
+                        <td className="px-6 py-3 text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => handleEdit(bill)}>{bill.bill_number}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
                         <td className="px-6 py-3 text-sm">
@@ -540,7 +540,7 @@ export default function AdminPage() {
                   <tbody className="divide-y">
                     {registrationBills.map(bill => (
                       <tr key={bill.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-3 text-sm font-medium text-gray-900">{bill.bill_number}</td>
+                        <td className="px-6 py-3 text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => handleEdit(bill)}>{bill.bill_number}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
                         <td className="px-6 py-3 text-sm">
@@ -596,7 +596,7 @@ export default function AdminPage() {
                   <tbody className="divide-y">
                     {monitoringBills.map(bill => (
                       <tr key={bill.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-3 text-sm font-medium text-gray-900">{bill.bill_number}</td>
+                        <td className="px-6 py-3 text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => handleEdit(bill)}>{bill.bill_number}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
                         <td className="px-6 py-3 text-sm">
