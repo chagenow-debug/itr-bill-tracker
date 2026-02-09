@@ -129,8 +129,7 @@ export async function createBill(data: {
   bill_number: string;
   companion_bills?: string;
   chamber: string;
-  title: string;
-  short_title: string;
+  subject: string;
   description?: string;
   committee?: string;
   committee_key?: string;
@@ -149,18 +148,17 @@ export async function createBill(data: {
 
   const result = await query(
     `INSERT INTO bills (
-      bill_number, companion_bills, chamber, title, short_title, description,
+      bill_number, companion_bills, chamber, subject, description,
       committee, committee_key, status, position, sponsor, subcommittee,
       fiscal_note, lsb, url, notes, is_pinned, created_at, updated_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW()
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
     ) RETURNING *`,
     [
       data.bill_number,
       data.companion_bills || null,
       data.chamber,
-      data.title,
-      data.short_title,
+      data.subject,
       data.description || null,
       data.committee || null,
       data.committee_key || null,
@@ -181,7 +179,7 @@ export async function createBill(data: {
 export async function updateBill(id: number, data: any) {
   // List of valid columns that can be updated
   const validColumns = [
-    'bill_number', 'companion_bills', 'previous_bill_number', 'chamber', 'title', 'short_title',
+    'bill_number', 'companion_bills', 'previous_bill_number', 'chamber', 'subject',
     'description', 'committee', 'committee_key', 'status', 'position',
     'sponsor', 'subcommittee', 'fiscal_note', 'lsb', 'url', 'notes', 'is_pinned', 'section_pin_order'
   ];
@@ -195,11 +193,6 @@ export async function updateBill(id: number, data: any) {
     if (!(column in data)) continue; // Skip columns not in data
 
     let value = data[column];
-
-    // Special case: if title is empty but short_title is provided, use short_title
-    if (column === 'title' && (value === '' || value === null || value === undefined) && data.short_title && data.short_title.trim() !== '') {
-      value = data.short_title;
-    }
 
     // Convert empty strings to null
     const finalValue = value === '' ? null : value;
@@ -239,8 +232,7 @@ export async function upsertBill(data: {
   bill_number: string;
   companion_bills?: string;
   chamber: string;
-  title: string;
-  short_title: string;
+  subject: string;
   description?: string;
   committee?: string;
   committee_key?: string;
@@ -257,44 +249,42 @@ export async function upsertBill(data: {
   // Auto-generate URL if not provided
   const billUrl = (data.url && data.url.trim() !== '') ? data.url : generateBillUrl(data.bill_number);
 
-  // Capitalize short_title: Title Case (capitalize first letter of each word)
-  const capitalizedShortTitle = capitalizeFirstWordOnly(data.short_title);
+  // Capitalize subject: Title Case (capitalize first letter of each word)
+  const capitalizedSubject = capitalizeFirstWordOnly(data.subject);
 
   // PostgreSQL UPSERT: INSERT ... ON CONFLICT ... DO UPDATE
   // Preserve is_pinned and fiscal_note from existing record if not explicitly provided
   const result = await query(
     `INSERT INTO bills (
-      bill_number, companion_bills, chamber, title, short_title, description,
+      bill_number, companion_bills, chamber, subject, description,
       committee, committee_key, status, position, sponsor, subcommittee,
       fiscal_note, lsb, url, notes, is_pinned, created_at, updated_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW()
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
     )
     ON CONFLICT (bill_number) DO UPDATE SET
       companion_bills = $2,
       chamber = $3,
-      title = $4,
-      short_title = $5,
-      description = $6,
-      committee = $7,
-      committee_key = $8,
-      status = $9,
-      position = $10,
-      sponsor = $11,
-      subcommittee = $12,
-      fiscal_note = COALESCE($13, bills.fiscal_note),
-      lsb = $14,
-      url = $15,
-      notes = $16,
-      is_pinned = COALESCE(NULLIF($17::text, 'false')::boolean, bills.is_pinned, false),
+      subject = $4,
+      description = $5,
+      committee = $6,
+      committee_key = $7,
+      status = $8,
+      position = $9,
+      sponsor = $10,
+      subcommittee = $11,
+      fiscal_note = COALESCE($12, bills.fiscal_note),
+      lsb = $13,
+      url = $14,
+      notes = $15,
+      is_pinned = COALESCE(NULLIF($16::text, 'false')::boolean, bills.is_pinned, false),
       updated_at = NOW()
     RETURNING *`,
     [
       data.bill_number,
       data.companion_bills || null,
       data.chamber,
-      data.title,
-      capitalizedShortTitle,
+      capitalizedSubject,
       data.description || null,
       data.committee || null,
       data.committee_key || null,

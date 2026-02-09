@@ -15,8 +15,7 @@ interface BillData {
   bill_number: string;
   companion_bills?: string;
   chamber: string;
-  title: string;
-  short_title: string;
+  subject: string;
   description?: string;
   committee?: string;
   committee_key?: string;
@@ -104,9 +103,11 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Use short_title as title if title is empty
-      if (!row.title) {
-        row.title = row.short_title || row.bill_number;
+      // Support both legacy (title/short_title) and new (subject) CSV formats
+      let subject = row.subject;
+      if (!subject) {
+        // Legacy format: use short_title if available, otherwise use title
+        subject = row.short_title || row.title || row.bill_number;
       }
 
       // Map position value to valid enum, or default to Monitor
@@ -126,8 +127,7 @@ export async function POST(request: NextRequest) {
         bill_number: row.bill_number,
         companion_bills: row.companion_bills || undefined,
         chamber: row.chamber,
-        title: row.title,
-        short_title: capitalizeFirstWordOnly(row.short_title || row.title.substring(0, 50)),
+        subject: capitalizeFirstWordOnly(subject),
         description: row.description || undefined,
         committee: row.committee || undefined,
         committee_key: row.committee_key || undefined,
@@ -162,8 +162,7 @@ export async function POST(request: NextRequest) {
           bill_number: bill.bill_number,
           companion_bills: bill.companion_bills,
           chamber: bill.chamber,
-          title: bill.title,
-          short_title: bill.short_title,
+          subject: bill.subject,
           description: bill.description,
           committee: bill.committee,
           committee_key: bill.committee_key,

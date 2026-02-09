@@ -7,8 +7,7 @@ interface Bill {
   bill_number: string;
   companion_bills?: string;
   previous_bill_number?: string;
-  title: string;
-  short_title: string;
+  subject: string;
   position: "Support" | "Against" | "Monitor" | "Undecided";
   chamber: string;
   status?: string;
@@ -51,8 +50,7 @@ export default function Home() {
   const filteredBills = bills.filter(bill => {
     const matchSearch = !search ||
       bill.bill_number.toLowerCase().includes(search.toLowerCase()) ||
-      bill.short_title.toLowerCase().includes(search.toLowerCase()) ||
-      bill.title.toLowerCase().includes(search.toLowerCase()) ||
+      bill.subject.toLowerCase().includes(search.toLowerCase()) ||
       (bill.description?.toLowerCase().includes(search.toLowerCase()) || false);
 
     const matchChamber = chamber === "all" ||
@@ -171,7 +169,7 @@ export default function Home() {
                       )}
                     </td>
                     <td className="title-col">
-                      <div className="short-title">{bill.short_title}</div>
+                      <div className="short-title">{bill.subject}</div>
                     </td>
                     <td>
                       {bill.committee ? (

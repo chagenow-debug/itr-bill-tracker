@@ -8,8 +8,7 @@ interface Bill {
   bill_number: string;
   companion_bills?: string;
   previous_bill_number?: string;
-  title: string;
-  short_title: string;
+  subject: string;
   position: "Support" | "Against" | "Monitor" | "Undecided";
   chamber: string;
   status?: string;
@@ -34,8 +33,7 @@ export default function AdminPage() {
     bill_number: "",
     companion_bills: "",
     previous_bill_number: "",
-    title: "",
-    short_title: "",
+    subject: "",
     chamber: "House",
     position: "Undecided" as const,
     status: "",
@@ -165,8 +163,7 @@ export default function AdminPage() {
       bill_number: bill.bill_number || "",
       companion_bills: bill.companion_bills || "",
       previous_bill_number: bill.previous_bill_number || "",
-      title: bill.title || "",
-      short_title: bill.short_title || "",
+      subject: bill.subject || "",
       status: bill.status || "",
       sponsor: bill.sponsor || "",
       description: bill.description || "",
@@ -301,17 +298,9 @@ export default function AdminPage() {
               />
 
               <input
-                name="title"
-                placeholder="Full Title (optional - will default to Short Title)"
-                value={formData.title}
-                onChange={handleInputChange}
-                className="border rounded px-3 py-2"
-              />
-
-              <input
-                name="short_title"
-                placeholder="Short Title"
-                value={formData.short_title}
+                name="subject"
+                placeholder="Subject"
+                value={formData.subject}
                 onChange={handleInputChange}
                 className="border rounded px-3 py-2"
                 required

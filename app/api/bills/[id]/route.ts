@@ -46,9 +46,9 @@ export async function PUT(
     const { id } = await params;
     const data = await request.json();
 
-    // Capitalize short_title if provided
-    if (data.short_title) {
-      data.short_title = capitalizeFirstWordOnly(data.short_title);
+    // Capitalize subject if provided
+    if (data.subject) {
+      data.subject = capitalizeFirstWordOnly(data.subject);
     }
 
     const bill = await updateBill(parseInt(id), data);
