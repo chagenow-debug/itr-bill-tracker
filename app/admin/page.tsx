@@ -130,8 +130,7 @@ export default function AdminPage() {
         bill_number: "",
         companion_bills: "",
         previous_bill_number: "",
-        title: "",
-        short_title: "",
+        subject: "",
         chamber: "House",
         position: "Undecided",
         status: "",
@@ -224,8 +223,7 @@ export default function AdminPage() {
                 bill_number: "",
                 companion_bills: "",
                 previous_bill_number: "",
-                title: "",
-                short_title: "",
+                subject: "",
                 chamber: "House",
                 position: "Undecided",
                 status: "",
@@ -463,7 +461,7 @@ export default function AdminPage() {
               {bills.map(bill => (
                 <tr key={bill.id} className="hover:bg-gray-50">
                   <td className="px-6 py-3 text-sm font-medium text-gray-900">{bill.bill_number}</td>
-                  <td className="px-6 py-3 text-sm text-gray-600">{bill.short_title}</td>
+                  <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
                   <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
                   <td className="px-6 py-3 text-sm">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
