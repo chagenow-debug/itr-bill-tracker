@@ -421,26 +421,33 @@ export default function Home() {
         }
 
         .title-col {
-          width: 40%;
-          min-width: 300px;
+          width: 35%;
+          min-width: 250px;
         }
 
         .bills-table td:nth-child(4),
         .bills-table th:nth-child(4) {
-          width: 120px;
-          min-width: 100px;
+          width: 80px;
+          min-width: 80px;
+          text-align: center;
         }
 
         .bills-table td:nth-child(5),
         .bills-table th:nth-child(5) {
           width: 100px;
-          min-width: 80px;
+          min-width: 100px;
         }
 
         .bills-table td:nth-child(6),
         .bills-table th:nth-child(6) {
-          width: 120px;
-          min-width: 100px;
+          width: 90px;
+          min-width: 80px;
+        }
+
+        .bills-table td:nth-child(7),
+        .bills-table th:nth-child(7) {
+          width: 130px;
+          min-width: 110px;
         }
 
         .bill-link {
