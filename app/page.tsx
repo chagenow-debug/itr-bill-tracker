@@ -368,7 +368,7 @@ export default function Home() {
           border-radius: 8px;
           overflow: hidden;
           box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-          table-layout: auto;
+          table-layout: fixed;
         }
 
         .bills-table thead {
@@ -410,44 +410,39 @@ export default function Home() {
         }
 
         .expand-col {
-          width: 30px;
+          width: 3.5%;
           text-align: center;
         }
 
         .bill-number-col {
-          width: 90px;
+          width: 8%;
           font-weight: 600;
           color: #011689;
         }
 
         .title-col {
-          width: 35%;
-          min-width: 250px;
+          width: 40%;
         }
 
         .bills-table td:nth-child(4),
         .bills-table th:nth-child(4) {
-          width: 80px;
-          min-width: 80px;
+          width: 8%;
           text-align: center;
         }
 
         .bills-table td:nth-child(5),
         .bills-table th:nth-child(5) {
-          width: 100px;
-          min-width: 100px;
+          width: 12%;
         }
 
         .bills-table td:nth-child(6),
         .bills-table th:nth-child(6) {
-          width: 90px;
-          min-width: 80px;
+          width: 10%;
         }
 
         .bills-table td:nth-child(7),
         .bills-table th:nth-child(7) {
-          width: 130px;
-          min-width: 110px;
+          width: 18.5%;
         }
 
         .bill-link {
