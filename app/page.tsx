@@ -431,32 +431,33 @@ export default function Home() {
 
         .title-col {
           width: auto;
+          max-width: 280px;
         }
 
         .bills-table td:nth-child(4),
         .bills-table th:nth-child(4) {
-          width: 85px;
+          width: 80px;
           text-align: center;
         }
 
         .bills-table td:nth-child(5),
         .bills-table th:nth-child(5) {
-          width: 100px;
+          width: 95px;
         }
 
         .bills-table td:nth-child(6),
         .bills-table th:nth-child(6) {
-          width: 90px;
+          width: 85px;
         }
 
         .bills-table td:nth-child(7),
         .bills-table th:nth-child(7) {
-          width: 85px;
+          width: 130px;
         }
 
         .bills-table td:nth-child(8),
         .bills-table th:nth-child(8) {
-          width: 130px;
+          width: 125px;
         }
 
         .bill-link {
@@ -630,27 +631,27 @@ export default function Home() {
 
           .bills-table td:nth-child(4),
           .bills-table th:nth-child(4) {
-            width: 75px;
+            width: 70px;
           }
 
           .bills-table td:nth-child(5),
           .bills-table th:nth-child(5) {
-            width: 95px;
+            width: 90px;
           }
 
           .bills-table td:nth-child(6),
           .bills-table th:nth-child(6) {
-            width: 80px;
+            width: 75px;
           }
 
           .bills-table td:nth-child(7),
           .bills-table th:nth-child(7) {
-            width: 75px;
+            width: 115px;
           }
 
           .bills-table td:nth-child(8),
           .bills-table th:nth-child(8) {
-            width: 105px;
+            width: 110px;
           }
         }
 
@@ -728,31 +729,32 @@ export default function Home() {
 
           .bills-table td:nth-child(4),
           .bills-table th:nth-child(4) {
-            width: 60px;
+            width: 55px;
           }
 
           .bills-table td:nth-child(5),
           .bills-table th:nth-child(5) {
-            width: 70px;
+            width: 65px;
           }
 
           .bills-table td:nth-child(6),
           .bills-table th:nth-child(6) {
-            width: 65px;
+            width: 60px;
           }
 
           .bills-table td:nth-child(7),
           .bills-table th:nth-child(7) {
-            width: 65px;
+            width: 95px;
           }
 
           .bills-table td:nth-child(8),
           .bills-table th:nth-child(8) {
-            width: 85px;
+            width: 80px;
           }
 
           .title-col {
             font-size: 0.85em;
+            max-width: 200px;
           }
 
           .position-badge {
