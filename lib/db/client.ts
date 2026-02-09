@@ -150,10 +150,10 @@ export async function createBill(data: {
   const result = await query(
     `INSERT INTO bills (
       bill_number, companion_bills, chamber, subject, description,
-      committee, committee_key, manager, status, position, sponsor, subcommittee,
+      committee, committee_key, status, position, sponsor, subcommittee,
       fiscal_note, lsb, url, notes, is_pinned, created_at, updated_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW()
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
     ) RETURNING *`,
     [
       data.bill_number,
@@ -163,7 +163,6 @@ export async function createBill(data: {
       data.description || null,
       data.committee || null,
       data.committee_key || null,
-      data.manager || null,
       data.status || null,
       data.position,
       data.sponsor || null,
@@ -260,10 +259,10 @@ export async function upsertBill(data: {
   const result = await query(
     `INSERT INTO bills (
       bill_number, companion_bills, chamber, subject, description,
-      committee, committee_key, manager, status, position, sponsor, subcommittee,
+      committee, committee_key, status, position, sponsor, subcommittee,
       fiscal_note, lsb, url, notes, is_pinned, created_at, updated_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW()
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW()
     )
     ON CONFLICT (bill_number) DO UPDATE SET
       companion_bills = $2,
@@ -272,16 +271,15 @@ export async function upsertBill(data: {
       description = $5,
       committee = $6,
       committee_key = $7,
-      manager = $8,
-      status = $9,
-      position = $10,
-      sponsor = $11,
-      subcommittee = $12,
-      fiscal_note = COALESCE($13, bills.fiscal_note),
-      lsb = $14,
-      url = $15,
-      notes = $16,
-      is_pinned = COALESCE(NULLIF($17::text, 'false')::boolean, bills.is_pinned, false),
+      status = $8,
+      position = $9,
+      sponsor = $10,
+      subcommittee = $11,
+      fiscal_note = COALESCE($12, bills.fiscal_note),
+      lsb = $13,
+      url = $14,
+      notes = $15,
+      is_pinned = COALESCE(NULLIF($16::text, 'false')::boolean, bills.is_pinned, false),
       updated_at = NOW()
     RETURNING *`,
     [
@@ -292,7 +290,6 @@ export async function upsertBill(data: {
       data.description || null,
       data.committee || null,
       data.committee_key || null,
-      data.manager || null,
       data.status || null,
       data.position,
       data.sponsor || null,
