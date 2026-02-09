@@ -136,10 +136,10 @@ export default function Home() {
                 <th className="expand-col"></th>
                 <th className="bill-number-col">Bill #</th>
                 <th className="title-col">Title</th>
+                <th style={{ textAlign: 'center', width: '80px' }}>Fiscal Note</th>
                 <th>Committee</th>
                 <th>Status</th>
                 <th>ITR Position</th>
-                <th style={{ textAlign: 'center', width: '50px' }}>Fiscal</th>
               </tr>
             </thead>
             <tbody>
@@ -173,6 +173,15 @@ export default function Home() {
                     <td className="title-col">
                       <div className="short-title">{bill.subject}</div>
                     </td>
+                    <td style={{ textAlign: 'center' }}>
+                      {bill.fiscal_note ? (
+                        <a href={bill.fiscal_note} target="_blank" rel="noopener noreferrer" title="View Fiscal Note" style={{ textDecoration: 'none', fontSize: '1.2em' }}>
+                          💵
+                        </a>
+                      ) : (
+                        <span style={{ color: "#ccc" }}>—</span>
+                      )}
+                    </td>
                     <td>
                       {bill.committee ? (
                         <span className="committee-tag">{bill.committee}</span>
@@ -191,15 +200,6 @@ export default function Home() {
                       <span className={`position-badge ${getPositionClass(bill.position)}`}>
                         {bill.position}
                       </span>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      {bill.fiscal_note ? (
-                        <a href={bill.fiscal_note} target="_blank" rel="noopener noreferrer" title="View Fiscal Note" style={{ textDecoration: 'none', fontSize: '1.2em' }}>
-                          💵
-                        </a>
-                      ) : (
-                        <span style={{ color: "#ccc" }}>—</span>
-                      )}
                     </td>
                   </tr>
                   {expanded.has(bill.id) && (
