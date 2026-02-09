@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
       description: data.description || undefined,
       committee: data.committee || undefined,
       committee_key: data.committee_key || undefined,
+      manager: data.manager || undefined,
       status: data.status || undefined,
       position: data.position,
       sponsor: data.sponsor || undefined,
