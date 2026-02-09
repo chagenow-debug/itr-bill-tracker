@@ -410,12 +410,12 @@ export default function Home() {
         }
 
         .expand-col {
-          width: 45px;
+          width: 40px;
           text-align: center;
         }
 
         .bill-number-col {
-          width: 85px;
+          width: 75px;
           font-weight: 600;
           color: #011689;
         }
@@ -426,23 +426,23 @@ export default function Home() {
 
         .bills-table td:nth-child(4),
         .bills-table th:nth-child(4) {
-          width: 95px;
+          width: 85px;
           text-align: center;
         }
 
         .bills-table td:nth-child(5),
         .bills-table th:nth-child(5) {
-          width: 115px;
+          width: 100px;
         }
 
         .bills-table td:nth-child(6),
         .bills-table th:nth-child(6) {
-          width: 95px;
+          width: 85px;
         }
 
         .bills-table td:nth-child(7),
         .bills-table th:nth-child(7) {
-          width: 140px;
+          width: 130px;
         }
 
         .bill-link {
@@ -611,27 +611,27 @@ export default function Home() {
           }
 
           .bill-number-col {
-            width: 70px;
+            width: 65px;
           }
 
           .bills-table td:nth-child(4),
           .bills-table th:nth-child(4) {
-            width: 80px;
+            width: 75px;
           }
 
           .bills-table td:nth-child(5),
           .bills-table th:nth-child(5) {
-            width: 100px;
+            width: 95px;
           }
 
           .bills-table td:nth-child(6),
           .bills-table th:nth-child(6) {
-            width: 80px;
+            width: 75px;
           }
 
           .bills-table td:nth-child(7),
           .bills-table th:nth-child(7) {
-            width: 110px;
+            width: 105px;
           }
         }
 
