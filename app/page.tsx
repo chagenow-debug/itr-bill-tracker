@@ -774,40 +774,72 @@ export default function Home() {
           .filters {
             padding: 10px;
             gap: 10px;
+            flex-direction: column;
           }
 
+          .filter-group {
+            width: 100%;
+          }
+
+          .filter-group select,
+          .filter-group input {
+            width: 100%;
+            min-width: unset;
+          }
+
+          /* Keep table layout but improve readability with text wrapping */
           .bills-table {
-            font-size: 0.65em;
+            font-size: 0.9em;
             border-radius: 4px;
           }
 
           .bills-table th {
-            padding: 4px 2px;
-            font-size: 0.6em;
+            padding: 8px 6px;
+            font-size: 0.8em;
+            line-height: 1.2;
+            white-space: normal;
+            word-wrap: break-word;
           }
 
           .bills-table td {
-            padding: 4px 2px;
+            padding: 8px 6px;
+            font-size: 0.9em;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.3;
+            vertical-align: middle;
           }
 
           .expand-col {
-            width: 25px;
-            padding: 4px 0;
+            width: 30px;
+            padding: 8px 3px;
+            flex-shrink: 0;
           }
 
           .bill-number-col {
-            width: 40px;
-            font-size: 0.75em;
+            width: 50px;
+            font-size: 0.85em;
+            padding: 8px 4px;
+          }
+
+          .title-col {
+            width: auto;
+            font-size: 0.9em;
           }
 
           .bills-table td:nth-child(4),
           .bills-table th:nth-child(4) {
-            width: 35px;
+            width: 40px;
+            text-align: center;
+            padding: 8px 3px;
+            flex-shrink: 0;
           }
 
           .bills-table td:nth-child(5),
           .bills-table th:nth-child(5) {
-            width: 50px;
+            width: 55px;
+            font-size: 0.85em;
+            padding: 8px 4px;
           }
 
           .bills-table td:nth-child(6),
@@ -817,21 +849,28 @@ export default function Home() {
 
           .bills-table td:nth-child(7),
           .bills-table th:nth-child(7) {
-            width: 60px;
+            width: 65px;
+            font-size: 0.85em;
+            padding: 8px 4px;
           }
 
           .position-badge {
-            font-size: 0.6em;
-            padding: 1px 4px;
+            font-size: 0.85em;
+            padding: 2px 4px;
+            display: inline-block;
           }
 
           .committee-tag {
-            font-size: 0.6em;
-            padding: 1px 3px;
+            font-size: 0.8em;
+            padding: 2px 4px;
+            display: inline-block;
+            margin-right: 2px;
+            margin-bottom: 2px;
           }
 
           .short-title {
-            font-size: 0.8em;
+            font-size: 0.9em;
+            margin-bottom: 2px;
           }
 
           .container {
