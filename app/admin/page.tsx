@@ -51,6 +51,27 @@ export default function AdminPage() {
   });
   const router = useRouter();
 
+  // Helper function to sort bills with companion grouping (same as main site)
+  const sortBillsWithCompanions = (billsToSort: Bill[]) => {
+    return billsToSort.sort((a, b) => {
+      // Sort by section_pin_order first (pinned items)
+      if ((a.section_pin_order ?? 999) !== (b.section_pin_order ?? 999)) {
+        return (a.section_pin_order ?? 999) - (b.section_pin_order ?? 999);
+      }
+
+      // Check if bills are companions (same position) - if so, keep them together
+      if (a.companion_bills && a.companion_bills.includes(b.bill_number)) {
+        return a.bill_number.localeCompare(b.bill_number);
+      }
+      if (b.companion_bills && b.companion_bills.includes(a.bill_number)) {
+        return a.bill_number.localeCompare(b.bill_number);
+      }
+
+      // Otherwise sort by bill_number
+      return a.bill_number.localeCompare(b.bill_number);
+    });
+  };
+
   useEffect(() => {
     const checkAuthAndLoadBills = async () => {
       try {
@@ -440,52 +461,175 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Bills Table */}
-        <div className="bg-white rounded shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-100 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Bill #</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Chamber</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {bills.map(bill => (
-                <tr key={bill.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-3 text-sm font-medium text-gray-900">{bill.bill_number}</td>
-                  <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
-                  <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
-                  <td className="px-6 py-3 text-sm">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      bill.position === "Support" ? "bg-green-100 text-green-800" :
-                      bill.position === "Against" ? "bg-red-100 text-red-800" :
-                      bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800" :
-                      "bg-gray-100 text-gray-800"
-                    }`}>
-                      {bill.position}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 text-sm space-x-2">
-                    <button
-                      onClick={() => handleEdit(bill)}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(bill.id)}
-                      className="text-red-600 hover:text-red-800 font-medium"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Bills organized by section (same order as main site) */}
+        <div className="space-y-6">
+          {/* Priority Bills */}
+          {(() => {
+            const priorityBills = sortBillsWithCompanions(bills.filter(bill => bill.is_pinned));
+            return priorityBills.length > 0 ? (
+              <div className="bg-white rounded shadow overflow-hidden">
+                <div className="bg-red-700 text-white px-6 py-3 font-semibold">
+                  ⭐ Priority Bills ({priorityBills.length})
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-100 border-b">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Bill #</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Chamber</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {priorityBills.map(bill => (
+                      <tr key={bill.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-3 text-sm font-medium text-gray-900">{bill.bill_number}</td>
+                        <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
+                        <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
+                        <td className="px-6 py-3 text-sm">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            bill.position === "Support" ? "bg-green-100 text-green-800" :
+                            bill.position === "Against" ? "bg-red-100 text-red-800" :
+                            bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800" :
+                            "bg-gray-100 text-gray-800"
+                          }`}>
+                            {bill.position}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3 text-sm space-x-2">
+                          <button
+                            onClick={() => handleEdit(bill)}
+                            className="text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(bill.id)}
+                            className="text-red-600 hover:text-red-800 font-medium"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null;
+          })()}
+
+          {/* Registration Bills */}
+          {(() => {
+            const registrationBills = sortBillsWithCompanions(bills.filter(bill => !bill.is_pinned && bill.position !== "Monitor"));
+            return registrationBills.length > 0 ? (
+              <div className="bg-white rounded shadow overflow-hidden">
+                <div className="bg-blue-700 text-white px-6 py-3 font-semibold">
+                  Registrations ({registrationBills.length})
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-100 border-b">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Bill #</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Chamber</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {registrationBills.map(bill => (
+                      <tr key={bill.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-3 text-sm font-medium text-gray-900">{bill.bill_number}</td>
+                        <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
+                        <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
+                        <td className="px-6 py-3 text-sm">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            bill.position === "Support" ? "bg-green-100 text-green-800" :
+                            bill.position === "Against" ? "bg-red-100 text-red-800" :
+                            bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800" :
+                            "bg-gray-100 text-gray-800"
+                          }`}>
+                            {bill.position}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3 text-sm space-x-2">
+                          <button
+                            onClick={() => handleEdit(bill)}
+                            className="text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(bill.id)}
+                            className="text-red-600 hover:text-red-800 font-medium"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null;
+          })()}
+
+          {/* Monitoring Bills */}
+          {(() => {
+            const monitoringBills = sortBillsWithCompanions(bills.filter(bill => !bill.is_pinned && bill.position === "Monitor"));
+            return monitoringBills.length > 0 ? (
+              <div className="bg-white rounded shadow overflow-hidden">
+                <div className="bg-amber-700 text-white px-6 py-3 font-semibold">
+                  Monitoring ({monitoringBills.length})
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-100 border-b">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Bill #</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Chamber</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {monitoringBills.map(bill => (
+                      <tr key={bill.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-3 text-sm font-medium text-gray-900">{bill.bill_number}</td>
+                        <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
+                        <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
+                        <td className="px-6 py-3 text-sm">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            bill.position === "Support" ? "bg-green-100 text-green-800" :
+                            bill.position === "Against" ? "bg-red-100 text-red-800" :
+                            bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800" :
+                            "bg-gray-100 text-gray-800"
+                          }`}>
+                            {bill.position}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3 text-sm space-x-2">
+                          <button
+                            onClick={() => handleEdit(bill)}
+                            className="text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(bill.id)}
+                            className="text-red-600 hover:text-red-800 font-medium"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null;
+          })()}
         </div>
       </div>
     </main>
