@@ -17,7 +17,7 @@ interface Bill {
   committee?: string;
   committee_key?: string;
   subcommittee?: string;
-  fiscal_note?: boolean;
+  fiscal_note?: string;
   lsb?: string;
   url?: string;
   notes?: string;
@@ -42,7 +42,7 @@ export default function AdminPage() {
     committee: "",
     committee_key: "",
     subcommittee: "",
-    fiscal_note: false,
+    fiscal_note: "",
     lsb: "",
     url: "",
     notes: "",
@@ -139,7 +139,7 @@ export default function AdminPage() {
         committee: "",
         committee_key: "",
         subcommittee: "",
-        fiscal_note: false,
+        fiscal_note: "",
         lsb: "",
         url: "",
         notes: "",
@@ -169,7 +169,7 @@ export default function AdminPage() {
       committee: bill.committee || "",
       committee_key: bill.committee_key || "",
       subcommittee: bill.subcommittee || "",
-      fiscal_note: bill.fiscal_note || false,
+      fiscal_note: bill.fiscal_note || "",
       lsb: bill.lsb || "",
       url: bill.url || "",
       notes: bill.notes || "",
@@ -232,7 +232,7 @@ export default function AdminPage() {
                 committee: "",
                 committee_key: "",
                 subcommittee: "",
-                fiscal_note: false,
+                fiscal_note: "",
                 lsb: "",
                 url: "",
                 notes: "",
@@ -388,19 +388,14 @@ export default function AdminPage() {
                 />
               </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="fiscal_note"
-                  checked={formData.fiscal_note}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 cursor-pointer"
-                  id="fiscal_note"
-                />
-                <label htmlFor="fiscal_note" className="text-sm font-medium cursor-pointer">
-                  Has Fiscal Note
-                </label>
-              </div>
+              <input
+                type="url"
+                name="fiscal_note"
+                placeholder="Fiscal Note URL (if available)"
+                value={formData.fiscal_note}
+                onChange={handleInputChange}
+                className="border rounded px-3 py-2"
+              />
 
               <textarea
                 name="notes"

@@ -23,7 +23,7 @@ interface BillData {
   position: "Support" | "Against" | "Monitor" | "Undecided";
   sponsor?: string;
   subcommittee?: string;
-  fiscal_note?: boolean | string;
+  fiscal_note?: string;
   lsb?: string;
   url?: string;
   notes?: string;
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         position: row.position,
         sponsor: row.sponsor || undefined,
         subcommittee: row.subcommittee || undefined,
-        fiscal_note: row.fiscal_note === "true" || row.fiscal_note === "1",
+        fiscal_note: (row.fiscal_note && row.fiscal_note.trim() !== '') ? row.fiscal_note : undefined,
         lsb: row.lsb || undefined,
         url: billUrl,
         notes: row.notes || undefined,
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
           position: bill.position,
           sponsor: bill.sponsor,
           subcommittee: bill.subcommittee,
-          fiscal_note: bill.fiscal_note ? "true" : undefined,
+          fiscal_note: bill.fiscal_note,
           lsb: bill.lsb,
           url: bill.url,
           notes: bill.notes,

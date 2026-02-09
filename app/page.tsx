@@ -15,6 +15,7 @@ interface Bill {
   url?: string;
   committee?: string;
   description?: string;
+  fiscal_note?: string;
   is_pinned?: boolean;
   section_pin_order?: number;
 }
@@ -138,6 +139,7 @@ export default function Home() {
                 <th>Committee</th>
                 <th>Status</th>
                 <th>ITR Position</th>
+                <th style={{ textAlign: 'center', width: '50px' }}>Fiscal</th>
               </tr>
             </thead>
             <tbody>
@@ -190,10 +192,19 @@ export default function Home() {
                         {bill.position}
                       </span>
                     </td>
+                    <td style={{ textAlign: 'center' }}>
+                      {bill.fiscal_note ? (
+                        <a href={bill.fiscal_note} target="_blank" rel="noopener noreferrer" title="View Fiscal Note" style={{ textDecoration: 'none', fontSize: '1.2em' }}>
+                          💵
+                        </a>
+                      ) : (
+                        <span style={{ color: "#ccc" }}>—</span>
+                      )}
+                    </td>
                   </tr>
                   {expanded.has(bill.id) && (
                     <tr className="detail-row">
-                      <td colSpan={6}>
+                      <td colSpan={7}>
                         <div className="bill-detail active">
                           <div className="detail-grid">
                             <div className="detail-section">
