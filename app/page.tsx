@@ -796,13 +796,13 @@ export default function Home() {
           }
 
           .bill-number-col {
-            width: 45px;
+            width: 40px;
             font-size: 0.75em;
           }
 
           .bills-table td:nth-child(4),
           .bills-table th:nth-child(4) {
-            width: 45px;
+            width: 35px;
           }
 
           .bills-table td:nth-child(5),
@@ -812,12 +812,12 @@ export default function Home() {
 
           .bills-table td:nth-child(6),
           .bills-table th:nth-child(6) {
-            width: 50px;
+            display: none;
           }
 
           .bills-table td:nth-child(7),
           .bills-table th:nth-child(7) {
-            width: 70px;
+            width: 60px;
           }
 
           .position-badge {
