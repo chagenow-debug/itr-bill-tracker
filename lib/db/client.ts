@@ -149,11 +149,11 @@ export async function createBill(data: {
 
   const result = await query(
     `INSERT INTO bills (
-      bill_number, companion_bills, chamber, subject, title, description,
+      bill_number, companion_bills, chamber, subject, title, short_title, description,
       committee, committee_key, manager, status, position, sponsor, subcommittee,
       fiscal_note, lsb, url, notes, is_pinned, created_at, updated_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW(), NOW()
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW()
     ) RETURNING *`,
     [
       data.bill_number,
@@ -161,6 +161,7 @@ export async function createBill(data: {
       data.chamber,
       data.subject,
       data.subject, // title is same as subject
+      data.subject, // short_title is same as subject
       data.description || null,
       data.committee || null,
       data.committee_key || null,
@@ -182,7 +183,7 @@ export async function createBill(data: {
 export async function updateBill(id: number, data: any) {
   // List of valid columns that can be updated
   const validColumns = [
-    'bill_number', 'companion_bills', 'previous_bill_number', 'chamber', 'subject',
+    'bill_number', 'companion_bills', 'previous_bill_number', 'chamber', 'subject', 'title', 'short_title',
     'description', 'committee', 'committee_key', 'manager', 'status', 'position',
     'sponsor', 'subcommittee', 'fiscal_note', 'lsb', 'url', 'notes', 'is_pinned', 'section_pin_order'
   ];
@@ -260,30 +261,31 @@ export async function upsertBill(data: {
   // Preserve is_pinned and fiscal_note from existing record if not explicitly provided
   const result = await query(
     `INSERT INTO bills (
-      bill_number, companion_bills, chamber, subject, title, description,
+      bill_number, companion_bills, chamber, subject, title, short_title, description,
       committee, committee_key, manager, status, position, sponsor, subcommittee,
       fiscal_note, lsb, url, notes, is_pinned, created_at, updated_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW(), NOW()
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW()
     )
     ON CONFLICT (bill_number) DO UPDATE SET
       companion_bills = $2,
       chamber = $3,
       subject = $4,
       title = $5,
-      description = $6,
-      committee = $7,
-      committee_key = $8,
-      manager = $9,
-      status = $10,
-      position = $11,
-      sponsor = $12,
-      subcommittee = $13,
-      fiscal_note = COALESCE($14, bills.fiscal_note),
-      lsb = $15,
-      url = $16,
-      notes = $17,
-      is_pinned = COALESCE(NULLIF($18::text, 'false')::boolean, bills.is_pinned, false),
+      short_title = $6,
+      description = $7,
+      committee = $8,
+      committee_key = $9,
+      manager = $10,
+      status = $11,
+      position = $12,
+      sponsor = $13,
+      subcommittee = $14,
+      fiscal_note = COALESCE($15, bills.fiscal_note),
+      lsb = $16,
+      url = $17,
+      notes = $18,
+      is_pinned = COALESCE(NULLIF($19::text, 'false')::boolean, bills.is_pinned, false),
       updated_at = NOW()
     RETURNING *`,
     [
@@ -292,6 +294,7 @@ export async function upsertBill(data: {
       data.chamber,
       capitalizedSubject,
       capitalizedSubject, // title is same as subject
+      capitalizedSubject, // short_title is same as subject
       data.description || null,
       data.committee || null,
       data.committee_key || null,
