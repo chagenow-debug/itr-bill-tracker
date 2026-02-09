@@ -35,27 +35,37 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
 
+    // Clean up empty string values to null
+    const cleanedData: any = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (value === "" || value === undefined) {
+        cleanedData[key] = null;
+      } else {
+        cleanedData[key] = value;
+      }
+    }
+
     // Generate URL if not provided
-    const billUrl = (data.url && data.url.trim() !== '') ? data.url : generateBillUrl(data.bill_number);
+    const billUrl = (cleanedData.url && cleanedData.url.trim() !== '') ? cleanedData.url : generateBillUrl(cleanedData.bill_number);
 
     const bill = await createBill({
-      bill_number: data.bill_number,
-      companion_bills: data.companion_bills || undefined,
-      chamber: data.chamber,
-      subject: capitalizeFirstWordOnly(data.subject),
-      description: data.description || undefined,
-      committee: data.committee || undefined,
-      committee_key: data.committee_key || undefined,
-      manager: data.manager || undefined,
-      status: data.status || undefined,
-      position: data.position,
-      sponsor: data.sponsor || undefined,
-      subcommittee: data.subcommittee || undefined,
-      fiscal_note: data.fiscal_note || undefined,
-      lsb: data.lsb || undefined,
+      bill_number: cleanedData.bill_number,
+      companion_bills: cleanedData.companion_bills || undefined,
+      chamber: cleanedData.chamber,
+      subject: capitalizeFirstWordOnly(cleanedData.subject),
+      description: cleanedData.description || undefined,
+      committee: cleanedData.committee || undefined,
+      committee_key: cleanedData.committee_key || undefined,
+      manager: cleanedData.manager || undefined,
+      status: cleanedData.status || undefined,
+      position: cleanedData.position,
+      sponsor: cleanedData.sponsor || undefined,
+      subcommittee: cleanedData.subcommittee || undefined,
+      fiscal_note: cleanedData.fiscal_note || undefined,
+      lsb: cleanedData.lsb || undefined,
       url: billUrl,
-      notes: data.notes || undefined,
-      is_pinned: data.is_pinned || false,
+      notes: cleanedData.notes || undefined,
+      is_pinned: cleanedData.is_pinned || false,
     });
 
     return NextResponse.json(bill, { status: 201 });
