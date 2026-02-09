@@ -59,10 +59,19 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(bill, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating bill:", error);
+    console.error("Error message:", error.message);
+    console.error("Error code:", error.code);
+    console.error("Error detail:", error.detail);
+    console.error("Full error:", JSON.stringify(error, null, 2));
     return NextResponse.json(
-      { error: "Failed to create bill" },
+      {
+        error: "Failed to create bill",
+        details: error.message,
+        code: error.code,
+        detail: error.detail
+      },
       { status: 500 }
     );
   }
