@@ -14,6 +14,7 @@ interface Bill {
   sponsor?: string;
   url?: string;
   committee?: string;
+  manager?: string;
   description?: string;
   fiscal_note?: string;
   is_pinned?: boolean;
@@ -138,6 +139,7 @@ export default function Home() {
                 <th className="title-col">Title</th>
                 <th style={{ textAlign: 'center', width: '80px' }}>Fiscal Note</th>
                 <th>Committee</th>
+                <th>Manager</th>
                 <th>Status</th>
                 <th>ITR Position</th>
               </tr>
@@ -190,6 +192,13 @@ export default function Home() {
                       )}
                     </td>
                     <td>
+                      {bill.manager ? (
+                        <span className="committee-tag">{bill.manager}</span>
+                      ) : (
+                        <span style={{ color: "#999" }}>—</span>
+                      )}
+                    </td>
+                    <td>
                       {bill.status ? (
                         <span className="status-badge">{bill.status}</span>
                       ) : (
@@ -204,7 +213,7 @@ export default function Home() {
                   </tr>
                   {expanded.has(bill.id) && (
                     <tr className="detail-row">
-                      <td colSpan={7}>
+                      <td colSpan={8}>
                         <div className="bill-detail active">
                           <div className="detail-grid">
                             <div className="detail-section">
@@ -437,11 +446,16 @@ export default function Home() {
 
         .bills-table td:nth-child(6),
         .bills-table th:nth-child(6) {
-          width: 85px;
+          width: 90px;
         }
 
         .bills-table td:nth-child(7),
         .bills-table th:nth-child(7) {
+          width: 85px;
+        }
+
+        .bills-table td:nth-child(8),
+        .bills-table th:nth-child(8) {
           width: 130px;
         }
 
@@ -626,11 +640,16 @@ export default function Home() {
 
           .bills-table td:nth-child(6),
           .bills-table th:nth-child(6) {
-            width: 75px;
+            width: 80px;
           }
 
           .bills-table td:nth-child(7),
           .bills-table th:nth-child(7) {
+            width: 75px;
+          }
+
+          .bills-table td:nth-child(8),
+          .bills-table th:nth-child(8) {
             width: 105px;
           }
         }
@@ -724,6 +743,11 @@ export default function Home() {
 
           .bills-table td:nth-child(7),
           .bills-table th:nth-child(7) {
+            width: 65px;
+          }
+
+          .bills-table td:nth-child(8),
+          .bills-table th:nth-child(8) {
             width: 85px;
           }
 
@@ -844,11 +868,18 @@ export default function Home() {
 
           .bills-table td:nth-child(6),
           .bills-table th:nth-child(6) {
-            display: none;
+            width: 50px;
+            font-size: 0.85em;
+            padding: 8px 3px;
           }
 
           .bills-table td:nth-child(7),
           .bills-table th:nth-child(7) {
+            display: none;
+          }
+
+          .bills-table td:nth-child(8),
+          .bills-table th:nth-child(8) {
             width: 65px;
             font-size: 0.85em;
             padding: 8px 4px;

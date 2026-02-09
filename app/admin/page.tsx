@@ -16,6 +16,7 @@ interface Bill {
   description?: string;
   committee?: string;
   committee_key?: string;
+  manager?: string;
   subcommittee?: string;
   fiscal_note?: string;
   lsb?: string;
@@ -41,6 +42,7 @@ export default function AdminPage() {
     description: "",
     committee: "",
     committee_key: "",
+    manager: "",
     subcommittee: "",
     fiscal_note: "",
     lsb: "",
@@ -159,6 +161,7 @@ export default function AdminPage() {
         description: "",
         committee: "",
         committee_key: "",
+        manager: "",
         subcommittee: "",
         fiscal_note: "",
         lsb: "",
@@ -189,6 +192,7 @@ export default function AdminPage() {
       description: bill.description || "",
       committee: bill.committee || "",
       committee_key: bill.committee_key || "",
+      manager: bill.manager || "",
       subcommittee: bill.subcommittee || "",
       fiscal_note: bill.fiscal_note || "",
       lsb: bill.lsb || "",
@@ -252,6 +256,7 @@ export default function AdminPage() {
                 description: "",
                 committee: "",
                 committee_key: "",
+                manager: "",
                 subcommittee: "",
                 fiscal_note: "",
                 lsb: "",
@@ -376,12 +381,22 @@ export default function AdminPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <input
+                  name="manager"
+                  placeholder="Manager"
+                  value={formData.manager}
+                  onChange={handleInputChange}
+                  className="border rounded px-3 py-2"
+                />
+                <input
                   name="committee_key"
                   placeholder="Committee Key"
                   value={formData.committee_key}
                   onChange={handleInputChange}
                   className="border rounded px-3 py-2"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <input
                   name="subcommittee"
                   placeholder="Subcommittee"
