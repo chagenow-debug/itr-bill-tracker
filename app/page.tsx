@@ -605,11 +605,42 @@ export default function Home() {
           font-size: 0.95em;
         }
 
+        @media (max-width: 1024px) {
+          .expand-col {
+            width: 35px;
+          }
+
+          .bill-number-col {
+            width: 70px;
+          }
+
+          .bills-table td:nth-child(4),
+          .bills-table th:nth-child(4) {
+            width: 80px;
+          }
+
+          .bills-table td:nth-child(5),
+          .bills-table th:nth-child(5) {
+            width: 100px;
+          }
+
+          .bills-table td:nth-child(6),
+          .bills-table th:nth-child(6) {
+            width: 80px;
+          }
+
+          .bills-table td:nth-child(7),
+          .bills-table th:nth-child(7) {
+            width: 110px;
+          }
+        }
+
         @media (max-width: 768px) {
           .header {
             flex-direction: column;
             text-align: center;
             gap: 10px;
+            padding: 15px;
           }
 
           .header-left {
@@ -617,36 +648,194 @@ export default function Home() {
             gap: 5px;
           }
 
+          .header h1 {
+            font-size: 1.4em;
+          }
+
           .session-info {
             text-align: center;
+            font-size: 0.85em;
           }
 
           .filters {
             flex-direction: column;
             align-items: stretch;
+            padding: 12px;
+          }
+
+          .filter-group {
+            width: 100%;
+          }
+
+          .filter-group label {
+            font-size: 0.75em;
           }
 
           .filter-group select,
           .filter-group input {
             width: 100%;
+            padding: 6px 10px;
+            font-size: 0.9em;
           }
 
           .admin-btn {
             margin-left: 0;
             width: 100%;
+            padding: 6px 10px;
+            font-size: 0.9em;
           }
 
           .bills-table {
-            font-size: 0.85em;
+            font-size: 0.75em;
           }
 
-          .bills-table th,
+          .bills-table th {
+            padding: 6px 4px;
+            font-size: 0.7em;
+          }
+
           .bills-table td {
-            padding: 8px;
+            padding: 6px 4px;
+          }
+
+          .expand-col {
+            width: 30px;
+          }
+
+          .bill-number-col {
+            width: 55px;
+            font-size: 0.8em;
+          }
+
+          .bills-table td:nth-child(4),
+          .bills-table th:nth-child(4) {
+            width: 60px;
+          }
+
+          .bills-table td:nth-child(5),
+          .bills-table th:nth-child(5) {
+            width: 70px;
+          }
+
+          .bills-table td:nth-child(6),
+          .bills-table th:nth-child(6) {
+            width: 65px;
+          }
+
+          .bills-table td:nth-child(7),
+          .bills-table th:nth-child(7) {
+            width: 85px;
           }
 
           .title-col {
-            min-width: 200px;
+            font-size: 0.85em;
+          }
+
+          .position-badge {
+            font-size: 0.65em;
+            padding: 2px 6px;
+          }
+
+          .committee-tag {
+            font-size: 0.7em;
+            padding: 2px 4px;
+          }
+
+          .status-badge {
+            font-size: 0.7em;
+          }
+
+          .short-title {
+            font-size: 0.85em;
+          }
+
+          .container {
+            padding: 10px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .header {
+            padding: 12px;
+          }
+
+          .header-logo {
+            height: 40px;
+          }
+
+          .header h1 {
+            font-size: 1.2em;
+          }
+
+          .session-info {
+            font-size: 0.75em;
+          }
+
+          .filters {
+            padding: 10px;
+            gap: 10px;
+          }
+
+          .bills-table {
+            font-size: 0.65em;
+            border-radius: 4px;
+          }
+
+          .bills-table th {
+            padding: 4px 2px;
+            font-size: 0.6em;
+          }
+
+          .bills-table td {
+            padding: 4px 2px;
+          }
+
+          .expand-col {
+            width: 25px;
+            padding: 4px 0;
+          }
+
+          .bill-number-col {
+            width: 45px;
+            font-size: 0.75em;
+          }
+
+          .bills-table td:nth-child(4),
+          .bills-table th:nth-child(4) {
+            width: 45px;
+          }
+
+          .bills-table td:nth-child(5),
+          .bills-table th:nth-child(5) {
+            width: 50px;
+          }
+
+          .bills-table td:nth-child(6),
+          .bills-table th:nth-child(6) {
+            width: 50px;
+          }
+
+          .bills-table td:nth-child(7),
+          .bills-table th:nth-child(7) {
+            width: 70px;
+          }
+
+          .position-badge {
+            font-size: 0.6em;
+            padding: 1px 4px;
+          }
+
+          .committee-tag {
+            font-size: 0.6em;
+            padding: 1px 3px;
+          }
+
+          .short-title {
+            font-size: 0.8em;
+          }
+
+          .container {
+            padding: 8px;
           }
         }
       `}</style>
