@@ -172,13 +172,13 @@ export default function Home() {
                         {bill.bill_number}
                       </a>
                       {bill.previous_bill_number && (
-                        <div style={{ fontSize: "0.8em", color: "#999", marginTop: "3px" }}>
-                          Previous: {bill.previous_bill_number}
+                        <div style={{ fontSize: "0.8em", color: "#999", marginTop: "3px", whiteSpace: "nowrap" }}>
+                          Prev: {bill.previous_bill_number}
                         </div>
                       )}
                       {bill.companion_bills && (
-                        <div style={{ fontSize: "0.8em", color: "#999", marginTop: "3px" }}>
-                          Companion: {bill.companion_bills}
+                        <div style={{ fontSize: "0.8em", color: "#999", marginTop: "3px", whiteSpace: "nowrap" }}>
+                          Comp: {bill.companion_bills}
                         </div>
                       )}
                     </td>
