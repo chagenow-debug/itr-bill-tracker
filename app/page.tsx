@@ -96,16 +96,6 @@ export default function Home() {
     return daysSinceCreated <= 6;
   };
 
-  const isUpdatedBill = (updatedAt?: string, createdAt?: string): boolean => {
-    if (!updatedAt) return false;
-    // Don't show updated badge if it was just created
-    if (isNewBill(createdAt)) return false;
-    const updated = new Date(updatedAt);
-    const now = new Date();
-    const daysSinceUpdated = (now.getTime() - updated.getTime()) / (1000 * 60 * 60 * 24);
-    return daysSinceUpdated <= 7;
-  };
-
   // Helper function to sort bills with companion grouping
   const sortBillsWithCompanions = (billsToSort: Bill[]) => {
     return billsToSort.sort((a, b) => {
@@ -197,9 +187,6 @@ export default function Home() {
                         {bill.subject}
                         {isNewBill(bill.created_at) && (
                           <span className="badge badge-new">new</span>
-                        )}
-                        {isUpdatedBill(bill.updated_at, bill.created_at) && (
-                          <span className="badge badge-updated">updated</span>
                         )}
                       </div>
                     </td>
@@ -536,11 +523,6 @@ export default function Home() {
 
         .badge-new {
           background-color: #4CAF50;
-          color: white;
-        }
-
-        .badge-updated {
-          background-color: #FF9800;
           color: white;
         }
 
