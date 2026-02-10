@@ -19,6 +19,8 @@ interface Bill {
   fiscal_note?: string;
   is_pinned?: boolean;
   section_pin_order?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export default function Home() {
@@ -84,6 +86,24 @@ export default function Home() {
       default:
         return "position-tbd";
     }
+  };
+
+  const isNewBill = (createdAt?: string): boolean => {
+    if (!createdAt) return false;
+    const created = new Date(createdAt);
+    const now = new Date();
+    const daysSinceCreated = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+    return daysSinceCreated <= 6;
+  };
+
+  const isUpdatedBill = (updatedAt?: string, createdAt?: string): boolean => {
+    if (!updatedAt) return false;
+    // Don't show updated badge if it was just created
+    if (isNewBill(createdAt)) return false;
+    const updated = new Date(updatedAt);
+    const now = new Date();
+    const daysSinceUpdated = (now.getTime() - updated.getTime()) / (1000 * 60 * 60 * 24);
+    return daysSinceUpdated <= 7;
   };
 
   // Helper function to sort bills with companion grouping
@@ -173,7 +193,15 @@ export default function Home() {
                       )}
                     </td>
                     <td className="title-col">
-                      <div className="short-title">{bill.subject}</div>
+                      <div className="short-title">
+                        {bill.subject}
+                        {isNewBill(bill.created_at) && (
+                          <span className="badge badge-new">new</span>
+                        )}
+                        {isUpdatedBill(bill.updated_at, bill.created_at) && (
+                          <span className="badge badge-updated">updated</span>
+                        )}
+                      </div>
                     </td>
                     <td style={{ textAlign: 'center' }}>
                       {bill.fiscal_note ? (
@@ -492,6 +520,28 @@ export default function Home() {
           font-weight: 700;
           text-transform: uppercase;
           white-space: nowrap;
+        }
+
+        .badge {
+          display: inline-block;
+          padding: 3px 8px;
+          border-radius: 10px;
+          font-size: 0.7em;
+          font-weight: 700;
+          text-transform: uppercase;
+          white-space: nowrap;
+          margin-left: 6px;
+          letter-spacing: 0.3px;
+        }
+
+        .badge-new {
+          background-color: #4CAF50;
+          color: white;
+        }
+
+        .badge-updated {
+          background-color: #FF9800;
+          color: white;
         }
 
         .position-support {
