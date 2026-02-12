@@ -55,21 +55,43 @@ export default function AdminPage() {
 
   // Helper function to sort bills with companion grouping (same as main site)
   const sortBillsWithCompanions = (billsToSort: Bill[]) => {
+    // Helper to check if two bills are companions (bidirectional)
+    const areCompanions = (bill1: Bill, bill2: Bill): boolean => {
+      return (bill1.companion_bills && bill1.companion_bills.includes(bill2.bill_number)) ||
+             (bill2.companion_bills && bill2.companion_bills.includes(bill1.bill_number));
+    };
+
+    // Helper to get the sort key for a bill (used for grouping companions)
+    const getCompanionGroupKey = (bill: Bill): string => {
+      // Find the "first" bill in a companion group by comparing all companion relationships
+      let groupRepresentative = bill;
+      for (const otherBill of billsToSort) {
+        if (areCompanions(bill, otherBill)) {
+          // Use the one that comes first alphabetically as the group representative
+          if (otherBill.bill_number < groupRepresentative.bill_number) {
+            groupRepresentative = otherBill;
+          }
+        }
+      }
+      return groupRepresentative.bill_number;
+    };
+
     return billsToSort.sort((a, b) => {
       // Sort by section_pin_order first (pinned items)
       if ((a.section_pin_order ?? 999) !== (b.section_pin_order ?? 999)) {
         return (a.section_pin_order ?? 999) - (b.section_pin_order ?? 999);
       }
 
-      // Check if bills are companions (same position) - if so, keep them together
-      if (a.companion_bills && a.companion_bills.includes(b.bill_number)) {
-        return a.bill_number.localeCompare(b.bill_number);
-      }
-      if (b.companion_bills && b.companion_bills.includes(a.bill_number)) {
-        return a.bill_number.localeCompare(b.bill_number);
+      // Check if bills are in the same companion group
+      const aGroupKey = getCompanionGroupKey(a);
+      const bGroupKey = getCompanionGroupKey(b);
+
+      if (aGroupKey !== bGroupKey) {
+        // Different groups, sort by group representative
+        return aGroupKey.localeCompare(bGroupKey);
       }
 
-      // Otherwise sort by bill_number
+      // Same group, sort by bill number within group
       return a.bill_number.localeCompare(b.bill_number);
     });
   };
