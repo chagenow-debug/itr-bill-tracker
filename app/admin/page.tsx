@@ -592,7 +592,7 @@ export default function AdminPage() {
         <div className="space-y-6">
           {/* Priority Bills */}
           {(() => {
-            const priorityBills = sortBillsWithCompanions(bills.filter(bill => bill.is_pinned));
+            const priorityBills = sortBillsWithCompanions(bills.filter(bill => bill.is_pinned && bill.position !== "Archive" && !bill.is_archived));
             return priorityBills.length > 0 ? (
               <div className="bg-white rounded shadow overflow-hidden">
                 <div className="bg-red-700 text-white px-6 py-3 font-semibold">
@@ -751,7 +751,7 @@ export default function AdminPage() {
 
           {/* Registration Bills */}
           {(() => {
-            const registrationBills = sortBillsWithCompanions(bills.filter(bill => !bill.is_pinned && bill.position !== "Monitor"));
+            const registrationBills = sortBillsWithCompanions(bills.filter(bill => !bill.is_pinned && bill.position !== "Monitor" && bill.position !== "Archive" && !bill.is_archived));
             return registrationBills.length > 0 ? (
               <div className="bg-white rounded shadow overflow-hidden">
                 <div className="bg-blue-700 text-white px-6 py-3 font-semibold">
@@ -910,7 +910,7 @@ export default function AdminPage() {
 
           {/* Monitoring Bills */}
           {(() => {
-            const monitoringBills = sortBillsWithCompanions(bills.filter(bill => !bill.is_pinned && bill.position === "Monitor"));
+            const monitoringBills = sortBillsWithCompanions(bills.filter(bill => !bill.is_pinned && bill.position === "Monitor" && !bill.is_archived));
             return monitoringBills.length > 0 ? (
               <div className="bg-white rounded shadow overflow-hidden">
                 <div className="bg-amber-700 text-white px-6 py-3 font-semibold">
@@ -1069,7 +1069,7 @@ export default function AdminPage() {
 
           {/* Archive Bills */}
           {(() => {
-            const archiveBills = sortBillsWithCompanions(bills.filter(bill => bill.is_archived));
+            const archiveBills = sortBillsWithCompanions(bills.filter(bill => bill.is_archived || bill.position === "Archive"));
             return archiveBills.length > 0 ? (
               <div className="bg-white rounded shadow overflow-hidden">
                 <div className="bg-gray-700 text-white px-6 py-3 font-semibold">
