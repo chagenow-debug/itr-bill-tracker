@@ -9,7 +9,7 @@ interface Bill {
   companion_bills?: string;
   previous_bill_number?: string;
   subject: string;
-  position: "Support" | "Against" | "Monitor" | "Undecided";
+  position: "Support" | "Against" | "Monitor" | "Undecided" | "Archive";
   chamber: string;
   status?: string;
   sponsor?: string;
@@ -33,6 +33,7 @@ export default function AdminPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [openStatusDropdown, setOpenStatusDropdown] = useState<number | null>(null);
+  const [openPositionDropdown, setOpenPositionDropdown] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     bill_number: "",
     companion_bills: "",
@@ -285,6 +286,35 @@ export default function AdminPage() {
     }
   };
 
+  const handlePositionChange = async (id: number, newPosition: string) => {
+    try {
+      const bill = bills.find(b => b.id === id);
+      if (!bill) return;
+
+      const response = await fetch(`/api/bills/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...bill,
+          position: newPosition,
+        }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || "Failed to update position");
+      }
+
+      const updatedBill = await response.json();
+      setBills(bills.map(b => (b.id === id ? updatedBill : b)));
+      setOpenStatusDropdown(null);
+    } catch (error: any) {
+      console.error("Error updating position:", error);
+      alert("Error updating position: " + (error.message || "Unknown error"));
+    }
+  };
+
   return (
     <>
       <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
@@ -418,6 +448,7 @@ export default function AdminPage() {
                   <option>Against</option>
                   <option>Monitor</option>
                   <option>Undecided</option>
+                  <option>Archive</option>
                 </select>
 
                 <input
@@ -646,15 +677,55 @@ export default function AdminPage() {
                           </div>
                         </td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
-                        <td className="px-6 py-3 text-sm">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            bill.position === "Support" ? "bg-green-100 text-green-800" :
-                            bill.position === "Against" ? "bg-red-100 text-red-800" :
-                            bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800" :
-                            "bg-gray-100 text-gray-800"
-                          }`}>
-                            {bill.position}
-                          </span>
+                        <td className="px-6 py-3 text-sm relative">
+                          <div className="relative inline-block">
+                            <button
+                              onClick={() => setOpenPositionDropdown(openPositionDropdown === bill.id ? null : bill.id)}
+                              className={`px-3 py-1 rounded text-xs font-semibold whitespace-nowrap ${
+                                bill.position === "Support" ? "bg-green-100 text-green-800 hover:bg-green-200" :
+                                bill.position === "Against" ? "bg-red-100 text-red-800 hover:bg-red-200" :
+                                bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" :
+                                bill.position === "Archive" ? "bg-gray-100 text-gray-800 hover:bg-gray-200" :
+                                "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                              }`}
+                            >
+                              {bill.position} ▼
+                            </button>
+                            {openPositionDropdown === bill.id && (
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-max">
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Support")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Support
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Against")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Against
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Monitor")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Monitor
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Undecided")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Undecided
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Archive")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Archive
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-3 text-sm space-x-2">
                           <button
@@ -765,15 +836,55 @@ export default function AdminPage() {
                           </div>
                         </td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
-                        <td className="px-6 py-3 text-sm">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            bill.position === "Support" ? "bg-green-100 text-green-800" :
-                            bill.position === "Against" ? "bg-red-100 text-red-800" :
-                            bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800" :
-                            "bg-gray-100 text-gray-800"
-                          }`}>
-                            {bill.position}
-                          </span>
+                        <td className="px-6 py-3 text-sm relative">
+                          <div className="relative inline-block">
+                            <button
+                              onClick={() => setOpenPositionDropdown(openPositionDropdown === bill.id ? null : bill.id)}
+                              className={`px-3 py-1 rounded text-xs font-semibold whitespace-nowrap ${
+                                bill.position === "Support" ? "bg-green-100 text-green-800 hover:bg-green-200" :
+                                bill.position === "Against" ? "bg-red-100 text-red-800 hover:bg-red-200" :
+                                bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" :
+                                bill.position === "Archive" ? "bg-gray-100 text-gray-800 hover:bg-gray-200" :
+                                "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                              }`}
+                            >
+                              {bill.position} ▼
+                            </button>
+                            {openPositionDropdown === bill.id && (
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-max">
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Support")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Support
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Against")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Against
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Monitor")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Monitor
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Undecided")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Undecided
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Archive")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Archive
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-3 text-sm space-x-2">
                           <button
@@ -884,15 +995,55 @@ export default function AdminPage() {
                           </div>
                         </td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
-                        <td className="px-6 py-3 text-sm">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            bill.position === "Support" ? "bg-green-100 text-green-800" :
-                            bill.position === "Against" ? "bg-red-100 text-red-800" :
-                            bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800" :
-                            "bg-gray-100 text-gray-800"
-                          }`}>
-                            {bill.position}
-                          </span>
+                        <td className="px-6 py-3 text-sm relative">
+                          <div className="relative inline-block">
+                            <button
+                              onClick={() => setOpenPositionDropdown(openPositionDropdown === bill.id ? null : bill.id)}
+                              className={`px-3 py-1 rounded text-xs font-semibold whitespace-nowrap ${
+                                bill.position === "Support" ? "bg-green-100 text-green-800 hover:bg-green-200" :
+                                bill.position === "Against" ? "bg-red-100 text-red-800 hover:bg-red-200" :
+                                bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" :
+                                bill.position === "Archive" ? "bg-gray-100 text-gray-800 hover:bg-gray-200" :
+                                "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                              }`}
+                            >
+                              {bill.position} ▼
+                            </button>
+                            {openPositionDropdown === bill.id && (
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-max">
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Support")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Support
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Against")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Against
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Monitor")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Monitor
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Undecided")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Undecided
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Archive")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Archive
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-3 text-sm space-x-2">
                           <button
@@ -1003,15 +1154,55 @@ export default function AdminPage() {
                           </div>
                         </td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
-                        <td className="px-6 py-3 text-sm">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            bill.position === "Support" ? "bg-green-100 text-green-800" :
-                            bill.position === "Against" ? "bg-red-100 text-red-800" :
-                            bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800" :
-                            "bg-gray-100 text-gray-800"
-                          }`}>
-                            {bill.position}
-                          </span>
+                        <td className="px-6 py-3 text-sm relative">
+                          <div className="relative inline-block">
+                            <button
+                              onClick={() => setOpenPositionDropdown(openPositionDropdown === bill.id ? null : bill.id)}
+                              className={`px-3 py-1 rounded text-xs font-semibold whitespace-nowrap ${
+                                bill.position === "Support" ? "bg-green-100 text-green-800 hover:bg-green-200" :
+                                bill.position === "Against" ? "bg-red-100 text-red-800 hover:bg-red-200" :
+                                bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" :
+                                bill.position === "Archive" ? "bg-gray-100 text-gray-800 hover:bg-gray-200" :
+                                "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                              }`}
+                            >
+                              {bill.position} ▼
+                            </button>
+                            {openPositionDropdown === bill.id && (
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-max">
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Support")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Support
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Against")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Against
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Monitor")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Monitor
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Undecided")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Undecided
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Archive")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Archive
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-3 text-sm space-x-2">
                           <button

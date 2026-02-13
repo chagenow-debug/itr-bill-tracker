@@ -8,7 +8,7 @@ interface Bill {
   companion_bills?: string;
   previous_bill_number?: string;
   subject: string;
-  position: "Support" | "Against" | "Monitor" | "Undecided";
+  position: "Support" | "Against" | "Monitor" | "Undecided" | "Archive";
   chamber: string;
   status?: string;
   sponsor?: string;
