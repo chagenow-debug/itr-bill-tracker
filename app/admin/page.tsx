@@ -59,8 +59,10 @@ export default function AdminPage() {
   const sortBillsWithCompanions = (billsToSort: Bill[]) => {
     // Helper to check if two bills are companions (bidirectional)
     const areCompanions = (bill1: Bill, bill2: Bill): boolean => {
-      return (bill1.companion_bills && bill1.companion_bills.includes(bill2.bill_number)) ||
-             (bill2.companion_bills && bill2.companion_bills.includes(bill1.bill_number));
+      return !!(
+        (bill1.companion_bills && bill1.companion_bills.includes(bill2.bill_number)) ||
+        (bill2.companion_bills && bill2.companion_bills.includes(bill1.bill_number))
+      );
     };
 
     // Helper to get the sort key for a bill (used for grouping companions)
