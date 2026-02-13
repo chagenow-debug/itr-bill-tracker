@@ -185,7 +185,7 @@ export async function updateBill(id: number, data: any) {
   const validColumns = [
     'bill_number', 'companion_bills', 'previous_bill_number', 'chamber', 'subject', 'title', 'short_title',
     'description', 'committee', 'committee_key', 'manager', 'status', 'position',
-    'sponsor', 'subcommittee', 'fiscal_note', 'lsb', 'url', 'notes', 'is_pinned', 'section_pin_order'
+    'sponsor', 'subcommittee', 'fiscal_note', 'lsb', 'url', 'notes', 'is_pinned', 'section_pin_order', 'is_archived'
   ];
 
   const fields: string[] = [];

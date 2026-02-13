@@ -21,6 +21,7 @@ interface Bill {
   section_pin_order?: number;
   created_at?: string;
   updated_at?: string;
+  is_archived?: boolean;
 }
 
 export default function Home() {
@@ -142,11 +143,15 @@ export default function Home() {
   const priorityBills = sortBillsWithCompanions(filteredBills.filter(bill => bill.is_pinned));
 
   const registrationBills = sortBillsWithCompanions(
-    filteredBills.filter(bill => !bill.is_pinned && bill.position !== "Monitor")
+    filteredBills.filter(bill => !bill.is_pinned && bill.position !== "Monitor" && !bill.is_archived)
   );
 
   const monitoringBills = sortBillsWithCompanions(
-    filteredBills.filter(bill => !bill.is_pinned && bill.position === "Monitor")
+    filteredBills.filter(bill => !bill.is_pinned && bill.position === "Monitor" && !bill.is_archived)
+  );
+
+  const archivedBills = sortBillsWithCompanions(
+    filteredBills.filter(bill => bill.is_archived)
   );
 
   const renderBillsTable = (bills: Bill[], title: string, isPinned: boolean = false) => (
@@ -1024,6 +1029,7 @@ export default function Home() {
             {renderBillsTable(priorityBills, "ITR Priority Bills", true)}
             {renderBillsTable(registrationBills, "Registrations", false)}
             {renderBillsTable(monitoringBills, "Monitoring", false)}
+            {renderBillsTable(archivedBills, "Archive", false)}
           </>
         )}
 

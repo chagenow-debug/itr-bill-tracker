@@ -24,6 +24,7 @@ interface Bill {
   notes?: string;
   is_pinned?: boolean;
   section_pin_order?: number;
+  is_archived?: boolean;
 }
 
 export default function AdminPage() {
@@ -50,6 +51,7 @@ export default function AdminPage() {
     notes: "",
     is_pinned: false,
     section_pin_order: undefined as number | undefined,
+    is_archived: false,
   });
   const router = useRouter();
 
@@ -191,6 +193,7 @@ export default function AdminPage() {
         notes: "",
         is_pinned: false,
         section_pin_order: undefined,
+        is_archived: false,
       });
     } catch (error: any) {
       console.error("Error saving bill:", error);
@@ -222,6 +225,7 @@ export default function AdminPage() {
       notes: bill.notes || "",
       is_pinned: bill.is_pinned || false,
       section_pin_order: bill.section_pin_order,
+      is_archived: bill.is_archived || false,
     } as any);
     setShowForm(true);
   };
@@ -286,6 +290,7 @@ export default function AdminPage() {
                 notes: "",
                 is_pinned: false,
                 section_pin_order: undefined,
+                is_archived: false,
               });
             }}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -478,6 +483,20 @@ export default function AdminPage() {
                 </label>
               </div>
 
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="is_archived"
+                  checked={formData.is_archived}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 cursor-pointer"
+                  id="is_archived"
+                />
+                <label htmlFor="is_archived" className="text-sm font-medium cursor-pointer">
+                  Archive Bill
+                </label>
+              </div>
+
               <input
                 type="number"
                 name="section_pin_order"
@@ -632,6 +651,62 @@ export default function AdminPage() {
                   </thead>
                   <tbody className="divide-y">
                     {monitoringBills.map(bill => (
+                      <tr key={bill.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-3 text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => handleEdit(bill)}>{bill.bill_number}</td>
+                        <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
+                        <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
+                        <td className="px-6 py-3 text-sm">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            bill.position === "Support" ? "bg-green-100 text-green-800" :
+                            bill.position === "Against" ? "bg-red-100 text-red-800" :
+                            bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800" :
+                            "bg-gray-100 text-gray-800"
+                          }`}>
+                            {bill.position}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3 text-sm space-x-2">
+                          <button
+                            onClick={() => handleEdit(bill)}
+                            className="text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(bill.id)}
+                            className="text-red-600 hover:text-red-800 font-medium"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null;
+          })()}
+
+          {/* Archive Bills */}
+          {(() => {
+            const archiveBills = sortBillsWithCompanions(bills.filter(bill => bill.is_archived));
+            return archiveBills.length > 0 ? (
+              <div className="bg-white rounded shadow overflow-hidden">
+                <div className="bg-gray-700 text-white px-6 py-3 font-semibold">
+                  Archive ({archiveBills.length})
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-100 border-b">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Bill #</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Chamber</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {archiveBills.map(bill => (
                       <tr key={bill.id} className="hover:bg-gray-50">
                         <td className="px-6 py-3 text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => handleEdit(bill)}>{bill.bill_number}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
