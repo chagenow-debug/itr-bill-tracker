@@ -142,10 +142,12 @@ export default function Home() {
     });
   };
 
-  const priorityBills = sortBillsWithCompanions(filteredBills.filter(bill => bill.is_pinned));
+  const priorityBills = sortBillsWithCompanions(
+    filteredBills.filter(bill => bill.is_pinned && bill.position !== "Archive" && !bill.is_archived)
+  );
 
   const registrationBills = sortBillsWithCompanions(
-    filteredBills.filter(bill => !bill.is_pinned && bill.position !== "Monitor" && !bill.is_archived)
+    filteredBills.filter(bill => !bill.is_pinned && bill.position !== "Monitor" && bill.position !== "Archive" && !bill.is_archived)
   );
 
   const monitoringBills = sortBillsWithCompanions(
@@ -153,7 +155,7 @@ export default function Home() {
   );
 
   const archivedBills = sortBillsWithCompanions(
-    filteredBills.filter(bill => bill.is_archived)
+    filteredBills.filter(bill => bill.is_archived || bill.position === "Archive")
   );
 
   const renderBillsTable = (bills: Bill[], title: string, isPinned: boolean = false) => (
