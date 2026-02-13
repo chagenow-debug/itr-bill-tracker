@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS bills (
   committee VARCHAR(255),
   committee_key VARCHAR(100),
   status VARCHAR(100),
-  position VARCHAR(50) NOT NULL CHECK (position IN ('Support', 'Against', 'Monitor', 'Undecided')),
+  position VARCHAR(50) NOT NULL CHECK (position IN ('Support', 'Against', 'Monitor', 'Undecided', 'Archive')),
   sponsor VARCHAR(255),
   subcommittee VARCHAR(255),
   fiscal_note BOOLEAN DEFAULT FALSE,
