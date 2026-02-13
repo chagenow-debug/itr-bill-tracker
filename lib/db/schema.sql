@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS bills (
   url TEXT,
   notes TEXT,
   is_pinned BOOLEAN DEFAULT FALSE,
+  is_archived BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
