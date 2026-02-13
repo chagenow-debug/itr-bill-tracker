@@ -48,6 +48,9 @@ export async function POST(request: NextRequest) {
     // Generate URL if not provided
     const billUrl = (cleanedData.url && cleanedData.url.trim() !== '') ? cleanedData.url : generateBillUrl(cleanedData.bill_number);
 
+    // Set default status to "Introduced" if not provided
+    const status = cleanedData.status || "Introduced";
+
     const bill = await createBill({
       bill_number: cleanedData.bill_number,
       companion_bills: cleanedData.companion_bills || undefined,
@@ -57,7 +60,7 @@ export async function POST(request: NextRequest) {
       committee: cleanedData.committee || undefined,
       committee_key: cleanedData.committee_key || undefined,
       manager: cleanedData.manager || undefined,
-      status: cleanedData.status || undefined,
+      status: status,
       position: cleanedData.position,
       sponsor: cleanedData.sponsor || undefined,
       subcommittee: cleanedData.subcommittee || undefined,
