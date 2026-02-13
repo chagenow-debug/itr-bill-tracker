@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 interface Bill {
@@ -28,9 +28,11 @@ interface Bill {
 }
 
 export default function AdminPage() {
+  const formRef = useRef<HTMLDivElement>(null);
   const [bills, setBills] = useState<Bill[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [openStatusDropdown, setOpenStatusDropdown] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     bill_number: "",
     companion_bills: "",
@@ -230,6 +232,13 @@ export default function AdminPage() {
       is_archived: bill.is_archived || false,
     } as any);
     setShowForm(true);
+
+    // Scroll to form after state update
+    setTimeout(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 0);
   };
 
   const handleDelete = async (id: number) => {
@@ -244,6 +253,35 @@ export default function AdminPage() {
       setBills(bills.filter(b => b.id !== id));
     } catch (error) {
       alert("Error deleting bill");
+    }
+  };
+
+  const handleStatusChange = async (id: number, newStatus: string) => {
+    try {
+      const bill = bills.find(b => b.id === id);
+      if (!bill) return;
+
+      const response = await fetch(`/api/bills/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...bill,
+          status: newStatus,
+        }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || "Failed to update status");
+      }
+
+      const updatedBill = await response.json();
+      setBills(bills.map(b => (b.id === id ? updatedBill : b)));
+      setOpenStatusDropdown(null);
+    } catch (error: any) {
+      console.error("Error updating status:", error);
+      alert("Error updating status: " + (error.message || "Unknown error"));
     }
   };
 
@@ -309,7 +347,7 @@ export default function AdminPage() {
 
         {/* Form */}
         {showForm && (
-          <div className="bg-white p-6 rounded shadow mb-8">
+          <div ref={formRef} className="bg-white p-6 rounded shadow mb-8">
             <h2 className="text-xl font-bold mb-4">
               {editingId ? "Edit Bill" : "Add New Bill"}
             </h2>
@@ -534,6 +572,7 @@ export default function AdminPage() {
                     <tr>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Bill #</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Chamber</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
@@ -544,6 +583,68 @@ export default function AdminPage() {
                       <tr key={bill.id} className="hover:bg-gray-50">
                         <td className="px-6 py-3 text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => handleEdit(bill)}>{bill.bill_number}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
+                        <td className="px-6 py-3 text-sm relative">
+                          <div className="relative inline-block">
+                            <button
+                              onClick={() => setOpenStatusDropdown(openStatusDropdown === bill.id ? null : bill.id)}
+                              className="px-3 py-1 bg-gray-200 text-gray-800 rounded text-xs hover:bg-gray-300 whitespace-nowrap"
+                            >
+                              {bill.status || "No Status"} ▼
+                            </button>
+                            {openStatusDropdown === bill.id && (
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-max">
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Introduced")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Introduced
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "In Committee")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  In Committee
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed Committee")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed Committee
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed Chamber")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed Chamber
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "In Other Chamber")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  In Other Chamber
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Signed into Law")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Signed into Law
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Died")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Died
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
                         <td className="px-6 py-3 text-sm">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -590,6 +691,7 @@ export default function AdminPage() {
                     <tr>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Bill #</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Chamber</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
@@ -600,6 +702,68 @@ export default function AdminPage() {
                       <tr key={bill.id} className="hover:bg-gray-50">
                         <td className="px-6 py-3 text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => handleEdit(bill)}>{bill.bill_number}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
+                        <td className="px-6 py-3 text-sm relative">
+                          <div className="relative inline-block">
+                            <button
+                              onClick={() => setOpenStatusDropdown(openStatusDropdown === bill.id ? null : bill.id)}
+                              className="px-3 py-1 bg-gray-200 text-gray-800 rounded text-xs hover:bg-gray-300 whitespace-nowrap"
+                            >
+                              {bill.status || "No Status"} ▼
+                            </button>
+                            {openStatusDropdown === bill.id && (
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-max">
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Introduced")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Introduced
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "In Committee")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  In Committee
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed Committee")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed Committee
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed Chamber")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed Chamber
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "In Other Chamber")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  In Other Chamber
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Signed into Law")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Signed into Law
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Died")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Died
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
                         <td className="px-6 py-3 text-sm">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -646,6 +810,7 @@ export default function AdminPage() {
                     <tr>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Bill #</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Chamber</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
@@ -656,6 +821,68 @@ export default function AdminPage() {
                       <tr key={bill.id} className="hover:bg-gray-50">
                         <td className="px-6 py-3 text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => handleEdit(bill)}>{bill.bill_number}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
+                        <td className="px-6 py-3 text-sm relative">
+                          <div className="relative inline-block">
+                            <button
+                              onClick={() => setOpenStatusDropdown(openStatusDropdown === bill.id ? null : bill.id)}
+                              className="px-3 py-1 bg-gray-200 text-gray-800 rounded text-xs hover:bg-gray-300 whitespace-nowrap"
+                            >
+                              {bill.status || "No Status"} ▼
+                            </button>
+                            {openStatusDropdown === bill.id && (
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-max">
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Introduced")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Introduced
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "In Committee")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  In Committee
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed Committee")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed Committee
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed Chamber")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed Chamber
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "In Other Chamber")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  In Other Chamber
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Signed into Law")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Signed into Law
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Died")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Died
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
                         <td className="px-6 py-3 text-sm">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -702,6 +929,7 @@ export default function AdminPage() {
                     <tr>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Bill #</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Chamber</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
@@ -712,6 +940,68 @@ export default function AdminPage() {
                       <tr key={bill.id} className="hover:bg-gray-50">
                         <td className="px-6 py-3 text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => handleEdit(bill)}>{bill.bill_number}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
+                        <td className="px-6 py-3 text-sm relative">
+                          <div className="relative inline-block">
+                            <button
+                              onClick={() => setOpenStatusDropdown(openStatusDropdown === bill.id ? null : bill.id)}
+                              className="px-3 py-1 bg-gray-200 text-gray-800 rounded text-xs hover:bg-gray-300 whitespace-nowrap"
+                            >
+                              {bill.status || "No Status"} ▼
+                            </button>
+                            {openStatusDropdown === bill.id && (
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-max">
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Introduced")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Introduced
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "In Committee")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  In Committee
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed Committee")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed Committee
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed Chamber")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed Chamber
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "In Other Chamber")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  In Other Chamber
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Signed into Law")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Signed into Law
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Died")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Died
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
                         <td className="px-6 py-3 text-sm">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
