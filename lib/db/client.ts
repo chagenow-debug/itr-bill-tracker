@@ -2,19 +2,6 @@ import pg from 'pg';
 
 const Client = pg.Client;
 
-// Capitalize first letter of each word (Title Case)
-function capitalizeFirstWordOnly(text: string): string {
-  if (!text || text.trim().length === 0) {
-    return text;
-  }
-
-  const trimmed = text.trim();
-  return trimmed
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
-
 // Generate URL for Iowa Legislature bill
 function generateBillUrl(billNumber: string, gaNumber: string = "91"): string {
   // Remove spaces from bill number for URL (e.g., "HF 2011" -> "HF2011")
