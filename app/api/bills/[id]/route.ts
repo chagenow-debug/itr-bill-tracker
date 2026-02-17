@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBillById, updateBill, deleteBill } from "@/lib/db/client";
 import { validateSession } from "@/lib/auth";
-import { capitalizeFirstWordOnly } from "@/lib/text-utils";
 
 export async function GET(
   request: NextRequest,
@@ -45,11 +44,6 @@ export async function PUT(
 
     const { id } = await params;
     const data = await request.json();
-
-    // Capitalize subject if provided
-    if (data.subject) {
-      data.subject = capitalizeFirstWordOnly(data.subject);
-    }
 
     const bill = await updateBill(parseInt(id), data);
 

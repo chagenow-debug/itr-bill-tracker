@@ -254,8 +254,8 @@ export async function upsertBill(data: {
   // Auto-generate URL if not provided
   const billUrl = (data.url && data.url.trim() !== '') ? data.url : generateBillUrl(data.bill_number);
 
-  // Capitalize subject: Title Case (capitalize first letter of each word)
-  const capitalizedSubject = capitalizeFirstWordOnly(data.subject);
+  // Use subject as-is (allows all caps, title case, or any formatting)
+  const subject = data.subject;
 
   // PostgreSQL UPSERT: INSERT ... ON CONFLICT ... DO UPDATE
   // Preserve is_pinned and fiscal_note from existing record if not explicitly provided
@@ -292,9 +292,9 @@ export async function upsertBill(data: {
       data.bill_number,
       data.companion_bills || null,
       data.chamber,
-      capitalizedSubject,
-      capitalizedSubject, // title is same as subject
-      capitalizedSubject, // short_title is same as subject
+      subject,
+      subject, // title is same as subject
+      subject, // short_title is same as subject
       data.description || null,
       data.committee || null,
       data.committee_key || null,

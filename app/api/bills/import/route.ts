@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { upsertBill } from "@/lib/db/client";
 import { validateSession } from "@/lib/auth";
-import { capitalizeFirstWordOnly } from "@/lib/text-utils";
 import Papa from "papaparse";
 
 // Generate URL for Iowa Legislature bill
@@ -127,7 +126,7 @@ export async function POST(request: NextRequest) {
         bill_number: row.bill_number,
         companion_bills: row.companion_bills || undefined,
         chamber: row.chamber,
-        subject: capitalizeFirstWordOnly(subject),
+        subject: subject,
         description: row.description || undefined,
         committee: row.committee || undefined,
         committee_key: row.committee_key || undefined,

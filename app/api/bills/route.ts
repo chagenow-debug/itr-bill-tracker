@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllBills, createBill } from "@/lib/db/client";
 import { validateSession } from "@/lib/auth";
-import { capitalizeFirstWordOnly } from "@/lib/text-utils";
 
 // Generate URL for Iowa Legislature bill
 function generateBillUrl(billNumber: string, gaNumber: string = "91"): string {
@@ -55,7 +54,7 @@ export async function POST(request: NextRequest) {
       bill_number: cleanedData.bill_number,
       companion_bills: cleanedData.companion_bills || undefined,
       chamber: cleanedData.chamber,
-      subject: capitalizeFirstWordOnly(cleanedData.subject),
+      subject: cleanedData.subject,
       description: cleanedData.description || undefined,
       committee: cleanedData.committee || undefined,
       committee_key: cleanedData.committee_key || undefined,
