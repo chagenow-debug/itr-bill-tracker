@@ -158,132 +158,222 @@ export default function Home() {
     filteredBills.filter(bill => bill.is_archived || bill.position === "Archive")
   );
 
-  const renderBillsTable = (bills: Bill[], title: string, isPinned: boolean = false) => (
-    <div style={{ marginBottom: "2rem" }}>
-      {bills.length > 0 && (
-        <>
-          <h2 style={{
-            fontSize: "1.3rem",
-            fontWeight: "600",
-            marginBottom: "1rem",
-            color: isPinned ? "#c41e3a" : "#333",
-            borderLeft: isPinned ? "4px solid #FFD700" : "none",
-            paddingLeft: isPinned ? "12px" : "0"
-          }}>
-            {isPinned ? "⭐ " : ""}{title}
-          </h2>
-          <table className="bills-table">
-            <thead>
-              <tr>
-                <th className="expand-col"></th>
-                <th className="bill-number-col">Bill #</th>
-                <th className="title-col">Title</th>
-                <th style={{ textAlign: 'center', width: '80px' }}>Fiscal Note</th>
-                <th>Committee</th>
-                <th>Manager</th>
-                <th>Status</th>
-                <th>ITR Position</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bills.map((bill) => (
-                <React.Fragment key={bill.id}>
-                  <tr>
-                    <td className="expand-col">
-                      <button
-                        className={`expand-btn ${expanded.has(bill.id) ? "active" : ""}`}
-                        onClick={() => toggleDetail(bill.id)}
-                        title="Expand details"
-                      >
-                        ▶
-                      </button>
-                    </td>
-                    <td className="bill-number-col">
-                      <a href={bill.url || "#"} target="_blank" rel="noopener noreferrer" className="bill-link">
-                        {bill.bill_number}
+  const renderBillsTable = (bills: Bill[], title: string, isPinned: boolean = false) => {
+    // Group companion bills with same subject
+    const renderCompanionGroup = (groupBills: Bill[]) => {
+      const firstBill = groupBills[0];
+      const representativeId = firstBill.id;
+
+      return (
+        <React.Fragment key={`group-${firstBill.bill_number}`}>
+          <tr>
+            <td className="expand-col">
+              <button
+                className={`expand-btn ${expanded.has(representativeId) ? "active" : ""}`}
+                onClick={() => toggleDetail(representativeId)}
+                title="Expand details"
+              >
+                ▶
+              </button>
+            </td>
+            <td className="bill-number-col">
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {groupBills.map((bill) => (
+                  <a
+                    key={bill.id}
+                    href={bill.url || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bill-link"
+                    style={{ display: "block" }}
+                  >
+                    {bill.bill_number}
+                  </a>
+                ))}
+              </div>
+              {firstBill.previous_bill_number && (
+                <div style={{ fontSize: "0.8em", color: "#999", marginTop: "6px", whiteSpace: "nowrap" }}>
+                  Prev: {firstBill.previous_bill_number}
+                </div>
+              )}
+            </td>
+            <td className="title-col">
+              <div className="short-title">
+                {groupBills[0].subject}
+                {isNewBill(groupBills[0].created_at) && (
+                  <span className="badge badge-new">new</span>
+                )}
+              </div>
+            </td>
+            <td style={{ textAlign: 'center' }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "center" }}>
+                {groupBills.map((bill) => (
+                  <div key={bill.id}>
+                    {bill.fiscal_note ? (
+                      <a href={bill.fiscal_note} target="_blank" rel="noopener noreferrer" title="View Fiscal Note" style={{ textDecoration: 'none', fontSize: '1.2em' }}>
+                        💵
                       </a>
-                      {bill.previous_bill_number && (
-                        <div style={{ fontSize: "0.8em", color: "#999", marginTop: "3px", whiteSpace: "nowrap" }}>
-                          Prev: {bill.previous_bill_number}
-                        </div>
-                      )}
-                      {bill.companion_bills && (
-                        <div style={{ fontSize: "0.8em", color: "#999", marginTop: "3px", whiteSpace: "nowrap" }}>
-                          Comp: {bill.companion_bills}
-                        </div>
-                      )}
-                    </td>
-                    <td className="title-col">
-                      <div className="short-title">
-                        {bill.subject}
-                        {isNewBill(bill.created_at) && (
-                          <span className="badge badge-new">new</span>
-                        )}
+                    ) : (
+                      <span style={{ color: "#ccc" }}>—</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </td>
+            <td>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {groupBills.map((bill) => (
+                  <div key={bill.id}>
+                    {bill.committee ? (
+                      <span className="committee-tag">{bill.committee}</span>
+                    ) : (
+                      <span style={{ color: "#999" }}>—</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </td>
+            <td>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {groupBills.map((bill) => (
+                  <div key={bill.id}>
+                    {bill.manager ? (
+                      <span className="committee-tag">{bill.manager}</span>
+                    ) : (
+                      <span style={{ color: "#999" }}>—</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </td>
+            <td>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {groupBills.map((bill) => (
+                  <div key={bill.id}>
+                    {bill.status ? (
+                      <span className="status-badge">{bill.status}</span>
+                    ) : (
+                      <span style={{ color: "#999" }}>—</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </td>
+            <td>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {groupBills.map((bill) => (
+                  <span key={bill.id} className={`position-badge ${getPositionClass(bill.position)}`}>
+                    {bill.position}
+                  </span>
+                ))}
+              </div>
+            </td>
+          </tr>
+          {expanded.has(representativeId) && (
+            <tr className="detail-row">
+              <td colSpan={8}>
+                <div className="bill-detail active">
+                  {groupBills.map((bill) => (
+                    <div key={bill.id} style={{ marginBottom: bill !== groupBills[groupBills.length - 1] ? "20px" : "0" }}>
+                      <div style={{ fontSize: "0.9em", fontWeight: "600", marginBottom: "10px", color: "#011689" }}>
+                        {bill.bill_number}
                       </div>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      {bill.fiscal_note ? (
-                        <a href={bill.fiscal_note} target="_blank" rel="noopener noreferrer" title="View Fiscal Note" style={{ textDecoration: 'none', fontSize: '1.2em' }}>
-                          💵
-                        </a>
-                      ) : (
-                        <span style={{ color: "#ccc" }}>—</span>
-                      )}
-                    </td>
-                    <td>
-                      {bill.committee ? (
-                        <span className="committee-tag">{bill.committee}</span>
-                      ) : (
-                        <span style={{ color: "#999" }}>—</span>
-                      )}
-                    </td>
-                    <td>
-                      {bill.manager ? (
-                        <span className="committee-tag">{bill.manager}</span>
-                      ) : (
-                        <span style={{ color: "#999" }}>—</span>
-                      )}
-                    </td>
-                    <td>
-                      {bill.status ? (
-                        <span className="status-badge">{bill.status}</span>
-                      ) : (
-                        <span style={{ color: "#999" }}>—</span>
-                      )}
-                    </td>
-                    <td>
-                      <span className={`position-badge ${getPositionClass(bill.position)}`}>
-                        {bill.position}
-                      </span>
-                    </td>
-                  </tr>
-                  {expanded.has(bill.id) && (
-                    <tr className="detail-row">
-                      <td colSpan={8}>
-                        <div className="bill-detail active">
-                          <div className="detail-grid">
-                            <div className="detail-section">
-                              <h5>Full Description</h5>
-                              <p>{bill.description || "No description available"}</p>
-                            </div>
-                            <div className="detail-section">
-                              <h5>Bill Information</h5>
-                              <p><strong>Sponsor:</strong> {bill.sponsor || "Not specified"}</p>
-                              <p><strong>Chamber:</strong> {bill.chamber}</p>
-                            </div>
-                          </div>
+                      <div className="detail-grid">
+                        <div className="detail-section">
+                          <h5>Full Description</h5>
+                          <p>{bill.description || "No description available"}</p>
                         </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
-    </div>
-  );
+                        <div className="detail-section">
+                          <h5>Bill Information</h5>
+                          <p><strong>Sponsor:</strong> {bill.sponsor || "Not specified"}</p>
+                          <p><strong>Chamber:</strong> {bill.chamber}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </td>
+            </tr>
+          )}
+        </React.Fragment>
+      );
+    };
+
+    // Helper to check if two bills are companions
+    const areCompanions = (bill1: Bill, bill2: Bill): boolean => {
+      const companions1 = bill1.companion_bills ? bill1.companion_bills.split(',').map(b => b.trim()) : [];
+      const companions2 = bill2.companion_bills ? bill2.companion_bills.split(',').map(b => b.trim()) : [];
+
+      return companions1.includes(bill2.bill_number) || companions2.includes(bill1.bill_number);
+    };
+
+    // Group bills by companion relationships
+    const groupedBills = new Map<string, Bill[]>();
+    const processedIds = new Set<number>();
+
+    for (const bill of bills) {
+      if (processedIds.has(bill.id)) continue;
+
+      const group = [bill];
+      processedIds.add(bill.id);
+
+      // Find all companion bills (recursively)
+      const queue = [bill];
+      while (queue.length > 0) {
+        const currentBill = queue.shift()!;
+        for (const otherBill of bills) {
+          if (!processedIds.has(otherBill.id) && areCompanions(currentBill, otherBill)) {
+            group.push(otherBill);
+            processedIds.add(otherBill.id);
+            queue.push(otherBill);
+          }
+        }
+      }
+
+      // Sort group by bill number
+      group.sort((a, b) => a.bill_number.localeCompare(b.bill_number));
+      const groupKey = group[0].bill_number; // Use first bill number as key
+      groupedBills.set(groupKey, group);
+    }
+
+    return (
+      <div style={{ marginBottom: "2rem" }}>
+        {bills.length > 0 && (
+          <>
+            <h2 style={{
+              fontSize: "1.3rem",
+              fontWeight: "600",
+              marginBottom: "1rem",
+              color: isPinned ? "#c41e3a" : "#333",
+              borderLeft: isPinned ? "4px solid #FFD700" : "none",
+              paddingLeft: isPinned ? "12px" : "0"
+            }}>
+              {isPinned ? "⭐ " : ""}{title}
+            </h2>
+            <table className="bills-table">
+              <thead>
+                <tr>
+                  <th className="expand-col"></th>
+                  <th className="bill-number-col">Bill #</th>
+                  <th className="title-col">Title</th>
+                  <th style={{ textAlign: 'center', width: '80px' }}>Fiscal Note</th>
+                  <th>Committee</th>
+                  <th>Manager</th>
+                  <th>Status</th>
+                  <th>ITR Position</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from(groupedBills.values()).map((group) =>
+                  renderCompanionGroup(group)
+                )}
+              </tbody>
+            </table>
+          </>
+        )}
+      </div>
+    );
+  };
 
   return (
     <>
