@@ -4,16 +4,22 @@ export async function GET() {
   try {
     console.log('[MIGRATE] Starting fiscal_note column type migration...');
 
-    // Change fiscal_note from BOOLEAN to TEXT to store URLs
+    // Drop the old BOOLEAN column and recreate as TEXT
+    // First, drop the column
     await query(
-      'ALTER TABLE bills ALTER COLUMN fiscal_note TYPE TEXT'
+      'ALTER TABLE bills DROP COLUMN IF EXISTS fiscal_note'
     );
 
-    console.log('[MIGRATE] fiscal_note column type changed from BOOLEAN to TEXT');
+    // Then add it back as TEXT
+    await query(
+      'ALTER TABLE bills ADD COLUMN fiscal_note TEXT'
+    );
+
+    console.log('[MIGRATE] fiscal_note column recreated as TEXT');
 
     return Response.json({
       success: true,
-      message: 'fiscal_note column type changed from BOOLEAN to TEXT'
+      message: 'fiscal_note column dropped and recreated as TEXT for URL storage'
     });
   } catch (error) {
     console.error('[MIGRATE] Error:', error);
