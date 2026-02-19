@@ -176,7 +176,7 @@ export default function Home() {
                 ▶
               </button>
             </td>
-            <td className="bill-number-col">
+            <td className="bill-number-col" style={{ verticalAlign: "middle" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 {groupBills.map((bill) => (
                   <a
@@ -197,15 +197,15 @@ export default function Home() {
                 </div>
               )}
             </td>
-            <td className="title-col" style={{ display: "flex", alignItems: "center" }}>
-              <div className="short-title">
-                {groupBills[0].subject}
+            <td className="title-col" style={{ verticalAlign: "middle" }}>
+              <div className="short-title" style={{ display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
+                <span>{groupBills[0].subject}</span>
                 {isNewBill(groupBills[0].created_at) && (
                   <span className="badge badge-new">new</span>
                 )}
               </div>
             </td>
-            <td style={{ textAlign: 'center' }}>
+            <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "center" }}>
                 {groupBills.map((bill) => (
                   <div key={bill.id}>
@@ -220,7 +220,7 @@ export default function Home() {
                 ))}
               </div>
             </td>
-            <td>
+            <td style={{ verticalAlign: 'middle' }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 {groupBills.map((bill) => (
                   <div key={bill.id}>
@@ -233,7 +233,7 @@ export default function Home() {
                 ))}
               </div>
             </td>
-            <td>
+            <td style={{ verticalAlign: 'middle' }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 {groupBills.map((bill) => (
                   <div key={bill.id}>
@@ -246,7 +246,7 @@ export default function Home() {
                 ))}
               </div>
             </td>
-            <td>
+            <td style={{ verticalAlign: 'middle' }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 {groupBills.map((bill) => (
                   <div key={bill.id}>
@@ -259,7 +259,7 @@ export default function Home() {
                 ))}
               </div>
             </td>
-            <td>
+            <td style={{ verticalAlign: 'middle' }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 {groupBills.map((bill) => (
                   <span key={bill.id} className={`position-badge ${getPositionClass(bill.position)}`}>
