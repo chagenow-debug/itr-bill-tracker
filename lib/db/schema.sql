@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS bills (
   position VARCHAR(50) NOT NULL CHECK (position IN ('Support', 'Against', 'Monitor', 'Undecided', 'Archive')),
   sponsor VARCHAR(255),
   subcommittee VARCHAR(255),
-  fiscal_note BOOLEAN DEFAULT FALSE,
+  fiscal_note TEXT,
   lsb VARCHAR(100),
   url TEXT,
   notes TEXT,
