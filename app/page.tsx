@@ -514,6 +514,7 @@ export default function Home() {
           overflow: hidden;
           box-shadow: 0 1px 3px rgba(0,0,0,0.1);
           table-layout: fixed;
+          border: 1px solid #eee;
         }
 
         .bills-table thead {
@@ -529,13 +530,23 @@ export default function Home() {
           text-transform: uppercase;
           letter-spacing: 0.5px;
           white-space: nowrap;
+          border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .bills-table th:last-child {
+          border-right: none;
         }
 
         .bills-table td {
           padding: 10px;
-          border-bottom: 1px solid #eee;
           font-size: 0.9em;
           vertical-align: top;
+          border-bottom: 1px solid #eee;
+          border-right: 1px solid #eee;
+        }
+
+        .bills-table td:last-child {
+          border-right: none;
         }
 
         .bills-table tbody tr {
