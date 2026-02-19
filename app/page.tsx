@@ -177,7 +177,7 @@ export default function Home() {
               </button>
             </td>
             <td className="bill-number-col">
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 {groupBills.map((bill) => (
                   <a
                     key={bill.id}
@@ -206,7 +206,7 @@ export default function Home() {
               </div>
             </td>
             <td style={{ textAlign: 'center' }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "center" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "center" }}>
                 {groupBills.map((bill) => (
                   <div key={bill.id}>
                     {bill.fiscal_note ? (
@@ -221,7 +221,7 @@ export default function Home() {
               </div>
             </td>
             <td>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 {groupBills.map((bill) => (
                   <div key={bill.id}>
                     {bill.committee ? (
@@ -234,7 +234,7 @@ export default function Home() {
               </div>
             </td>
             <td>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 {groupBills.map((bill) => (
                   <div key={bill.id}>
                     {bill.manager ? (
@@ -247,7 +247,7 @@ export default function Home() {
               </div>
             </td>
             <td>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 {groupBills.map((bill) => (
                   <div key={bill.id}>
                     {bill.status ? (
@@ -260,7 +260,7 @@ export default function Home() {
               </div>
             </td>
             <td>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 {groupBills.map((bill) => (
                   <span key={bill.id} className={`position-badge ${getPositionClass(bill.position)}`}>
                     {bill.position}
