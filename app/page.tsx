@@ -192,12 +192,12 @@ export default function Home() {
                 ))}
               </div>
               {firstBill.previous_bill_number && (
-                <div style={{ fontSize: "0.8em", color: "#999", marginTop: "6px", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: "0.8em", color: "#999", marginTop: "2px", whiteSpace: "nowrap" }}>
                   Prev: {firstBill.previous_bill_number}
                 </div>
               )}
             </td>
-            <td className="title-col">
+            <td className="title-col" style={{ display: "flex", alignItems: "center" }}>
               <div className="short-title">
                 {groupBills[0].subject}
                 {isNewBill(groupBills[0].created_at) && (
