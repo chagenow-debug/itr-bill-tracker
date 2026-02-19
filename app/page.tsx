@@ -167,7 +167,7 @@ export default function Home() {
       return (
         <React.Fragment key={`group-${firstBill.bill_number}`}>
           <tr>
-            <td className="expand-col">
+            <td className="expand-col" style={{ verticalAlign: 'top', paddingTop: '10px' }}>
               <button
                 className={`expand-btn ${expanded.has(representativeId) ? "active" : ""}`}
                 onClick={() => toggleDetail(representativeId)}
