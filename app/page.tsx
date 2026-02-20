@@ -179,23 +179,24 @@ export default function Home() {
             <td className="bill-number-col" style={{ verticalAlign: "middle" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 {groupBills.map((bill) => (
-                  <a
-                    key={bill.id}
-                    href={bill.url || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bill-link"
-                    style={{ display: "block" }}
-                  >
-                    {bill.bill_number}
-                  </a>
+                  <div key={bill.id} style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+                    <a
+                      href={bill.url || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bill-link"
+                      style={{ display: "block" }}
+                    >
+                      {bill.bill_number}
+                    </a>
+                    {bill.previous_bill_number && (
+                      <div style={{ fontSize: "0.75em", color: "#999", whiteSpace: "nowrap" }}>
+                        Prev: {bill.previous_bill_number}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
-              {firstBill.previous_bill_number && (
-                <div style={{ fontSize: "0.8em", color: "#999", marginTop: "2px", whiteSpace: "nowrap" }}>
-                  Prev: {firstBill.previous_bill_number}
-                </div>
-              )}
             </td>
             <td className="title-col" style={{ verticalAlign: "middle" }}>
               <div className="short-title" style={{ display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
