@@ -143,12 +143,8 @@ export default function Home() {
     });
   };
 
-  const priorityBills = sortBillsWithCompanions(
-    filteredBills.filter(bill => bill.is_pinned && bill.position !== "Archive" && !bill.is_archived && !bill.is_funnel)
-  );
-
   const registrationBills = sortBillsWithCompanions(
-    filteredBills.filter(bill => !bill.is_pinned && bill.position !== "Monitor" && bill.position !== "Archive" && !bill.is_archived && !bill.is_funnel)
+    filteredBills.filter(bill => bill.position !== "Monitor" && bill.position !== "Archive" && !bill.is_archived && !bill.is_funnel)
   );
 
   const monitoringBills = sortBillsWithCompanions(
@@ -1137,7 +1133,6 @@ export default function Home() {
           <div className="empty-message">No bills found</div>
         ) : (
           <>
-            {renderBillsTable(priorityBills, "ITR Priority Bills", true)}
             {renderBillsTable(registrationBills, "Registrations", false)}
             {renderBillsTable(monitoringBills, "Monitoring", false)}
             {renderBillsTable(funnelBills, "Did Not Survive Funnel", false)}
