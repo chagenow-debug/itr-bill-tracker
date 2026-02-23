@@ -22,6 +22,7 @@ interface Bill {
   created_at?: string;
   updated_at?: string;
   is_archived?: boolean;
+  is_funnel?: boolean;
 }
 
 export default function Home() {
@@ -143,15 +144,19 @@ export default function Home() {
   };
 
   const priorityBills = sortBillsWithCompanions(
-    filteredBills.filter(bill => bill.is_pinned && bill.position !== "Archive" && !bill.is_archived)
+    filteredBills.filter(bill => bill.is_pinned && bill.position !== "Archive" && !bill.is_archived && !bill.is_funnel)
   );
 
   const registrationBills = sortBillsWithCompanions(
-    filteredBills.filter(bill => !bill.is_pinned && bill.position !== "Monitor" && bill.position !== "Archive" && !bill.is_archived)
+    filteredBills.filter(bill => !bill.is_pinned && bill.position !== "Monitor" && bill.position !== "Archive" && !bill.is_archived && !bill.is_funnel)
   );
 
   const monitoringBills = sortBillsWithCompanions(
-    filteredBills.filter(bill => !bill.is_pinned && bill.position === "Monitor" && !bill.is_archived)
+    filteredBills.filter(bill => !bill.is_pinned && bill.position === "Monitor" && !bill.is_archived && !bill.is_funnel)
+  );
+
+  const funnelBills = sortBillsWithCompanions(
+    filteredBills.filter(bill => bill.is_funnel && !bill.is_archived && bill.position !== "Archive")
   );
 
   const archivedBills = sortBillsWithCompanions(
@@ -1135,6 +1140,7 @@ export default function Home() {
             {renderBillsTable(priorityBills, "ITR Priority Bills", true)}
             {renderBillsTable(registrationBills, "Registrations", false)}
             {renderBillsTable(monitoringBills, "Monitoring", false)}
+            {renderBillsTable(funnelBills, "Did Not Survive Funnel", false)}
             {renderBillsTable(archivedBills, "Archive", false)}
           </>
         )}

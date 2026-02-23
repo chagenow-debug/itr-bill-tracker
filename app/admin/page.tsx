@@ -25,6 +25,7 @@ interface Bill {
   is_pinned?: boolean;
   section_pin_order?: number;
   is_archived?: boolean;
+  is_funnel?: boolean;
 }
 
 export default function AdminPage() {
@@ -55,6 +56,7 @@ export default function AdminPage() {
     is_pinned: false,
     section_pin_order: undefined as number | undefined,
     is_archived: false,
+    is_funnel: false,
   });
   const router = useRouter();
 
@@ -199,6 +201,7 @@ export default function AdminPage() {
         is_pinned: false,
         section_pin_order: undefined,
         is_archived: false,
+        is_funnel: false,
       });
     } catch (error: any) {
       console.error("Error saving bill:", error);
@@ -231,6 +234,7 @@ export default function AdminPage() {
       is_pinned: bill.is_pinned || false,
       section_pin_order: bill.section_pin_order,
       is_archived: bill.is_archived || false,
+      is_funnel: bill.is_funnel || false,
     } as any);
     setShowForm(true);
 
@@ -361,6 +365,7 @@ export default function AdminPage() {
                 is_pinned: false,
                 section_pin_order: undefined,
                 is_archived: false,
+                is_funnel: false,
               });
             }}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -568,6 +573,20 @@ export default function AdminPage() {
                 </label>
               </div>
 
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="is_funnel"
+                  checked={formData.is_funnel}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 cursor-pointer"
+                  id="is_funnel"
+                />
+                <label htmlFor="is_funnel" className="text-sm font-medium cursor-pointer">
+                  Did Not Survive Funnel
+                </label>
+              </div>
+
               <input
                 type="number"
                 name="section_pin_order"
@@ -592,7 +611,7 @@ export default function AdminPage() {
         <div className="space-y-6">
           {/* Priority Bills */}
           {(() => {
-            const priorityBills = sortBillsWithCompanions(bills.filter(bill => bill.is_pinned && bill.position !== "Archive" && !bill.is_archived));
+            const priorityBills = sortBillsWithCompanions(bills.filter(bill => bill.is_pinned && bill.position !== "Archive" && !bill.is_archived && !bill.is_funnel));
             return priorityBills.length > 0 ? (
               <div className="bg-white rounded shadow overflow-hidden">
                 <div className="bg-red-700 text-white px-6 py-3 font-semibold">
@@ -751,7 +770,7 @@ export default function AdminPage() {
 
           {/* Registration Bills */}
           {(() => {
-            const registrationBills = sortBillsWithCompanions(bills.filter(bill => !bill.is_pinned && bill.position !== "Monitor" && bill.position !== "Archive" && !bill.is_archived));
+            const registrationBills = sortBillsWithCompanions(bills.filter(bill => !bill.is_pinned && bill.position !== "Monitor" && bill.position !== "Archive" && !bill.is_archived && !bill.is_funnel));
             return registrationBills.length > 0 ? (
               <div className="bg-white rounded shadow overflow-hidden">
                 <div className="bg-blue-700 text-white px-6 py-3 font-semibold">
@@ -910,7 +929,7 @@ export default function AdminPage() {
 
           {/* Monitoring Bills */}
           {(() => {
-            const monitoringBills = sortBillsWithCompanions(bills.filter(bill => !bill.is_pinned && bill.position === "Monitor" && !bill.is_archived));
+            const monitoringBills = sortBillsWithCompanions(bills.filter(bill => !bill.is_pinned && bill.position === "Monitor" && !bill.is_archived && !bill.is_funnel));
             return monitoringBills.length > 0 ? (
               <div className="bg-white rounded shadow overflow-hidden">
                 <div className="bg-amber-700 text-white px-6 py-3 font-semibold">
@@ -929,6 +948,165 @@ export default function AdminPage() {
                   </thead>
                   <tbody className="divide-y">
                     {monitoringBills.map(bill => (
+                      <tr key={bill.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-3 text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => handleEdit(bill)}>{bill.bill_number}</td>
+                        <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
+                        <td className="px-6 py-3 text-sm relative">
+                          <div className="relative inline-block">
+                            <button
+                              onClick={() => setOpenStatusDropdown(openStatusDropdown === bill.id ? null : bill.id)}
+                              className="px-3 py-1 bg-gray-200 text-gray-800 rounded text-xs hover:bg-gray-300 whitespace-nowrap"
+                            >
+                              {bill.status || "No Status"} ▼
+                            </button>
+                            {openStatusDropdown === bill.id && (
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-max">
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Introduced")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Introduced
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "In Committee")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  In Committee
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed Committee")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed Committee
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed Chamber")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed Chamber
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "In Other Chamber")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  In Other Chamber
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Passed")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Passed
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Signed into Law")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Signed into Law
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Died")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Died
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-3 text-sm text-gray-600">{bill.chamber}</td>
+                        <td className="px-6 py-3 text-sm relative">
+                          <div className="relative inline-block">
+                            <button
+                              onClick={() => setOpenPositionDropdown(openPositionDropdown === bill.id ? null : bill.id)}
+                              className={`px-3 py-1 rounded text-xs font-semibold whitespace-nowrap ${
+                                bill.position === "Support" ? "bg-green-100 text-green-800 hover:bg-green-200" :
+                                bill.position === "Against" ? "bg-red-100 text-red-800 hover:bg-red-200" :
+                                bill.position === "Monitor" ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" :
+                                bill.position === "Archive" ? "bg-gray-100 text-gray-800 hover:bg-gray-200" :
+                                "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                              }`}
+                            >
+                              {bill.position} ▼
+                            </button>
+                            {openPositionDropdown === bill.id && (
+                              <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-max">
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Support")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Support
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Against")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Against
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Monitor")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Monitor
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Undecided")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Undecided
+                                </button>
+                                <button
+                                  onClick={() => handlePositionChange(bill.id, "Archive")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Archive
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-3 text-sm space-x-2">
+                          <button
+                            onClick={() => handleEdit(bill)}
+                            className="text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(bill.id)}
+                            className="text-red-600 hover:text-red-800 font-medium"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null;
+          })()}
+
+          {/* Did Not Survive Funnel */}
+          {(() => {
+            const funnelBills = sortBillsWithCompanions(bills.filter(bill => bill.is_funnel && !bill.is_archived && bill.position !== "Archive"));
+            return funnelBills.length > 0 ? (
+              <div className="bg-white rounded shadow overflow-hidden">
+                <div className="bg-orange-700 text-white px-6 py-3 font-semibold">
+                  Did Not Survive Funnel ({funnelBills.length})
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-100 border-b">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Bill #</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Chamber</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Position</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {funnelBills.map(bill => (
                       <tr key={bill.id} className="hover:bg-gray-50">
                         <td className="px-6 py-3 text-sm font-medium text-blue-600 cursor-pointer hover:text-blue-800" onClick={() => handleEdit(bill)}>{bill.bill_number}</td>
                         <td className="px-6 py-3 text-sm text-gray-600">{bill.subject}</td>
