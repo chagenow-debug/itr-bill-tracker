@@ -650,6 +650,12 @@ export default function AdminPage() {
                                   Introduced
                                 </button>
                                 <button
+                                  onClick={() => handleStatusChange(bill.id, "Assigned")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Assigned
+                                </button>
+                                <button
                                   onClick={() => handleStatusChange(bill.id, "In Committee")}
                                   className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                                 >
@@ -807,6 +813,12 @@ export default function AdminPage() {
                                   className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                                 >
                                   Introduced
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Assigned")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Assigned
                                 </button>
                                 <button
                                   onClick={() => handleStatusChange(bill.id, "In Committee")}
@@ -968,6 +980,12 @@ export default function AdminPage() {
                                   Introduced
                                 </button>
                                 <button
+                                  onClick={() => handleStatusChange(bill.id, "Assigned")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Assigned
+                                </button>
+                                <button
                                   onClick={() => handleStatusChange(bill.id, "In Committee")}
                                   className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                                 >
@@ -1127,6 +1145,12 @@ export default function AdminPage() {
                                   Introduced
                                 </button>
                                 <button
+                                  onClick={() => handleStatusChange(bill.id, "Assigned")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Assigned
+                                </button>
+                                <button
                                   onClick={() => handleStatusChange(bill.id, "In Committee")}
                                   className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                                 >
@@ -1284,6 +1308,12 @@ export default function AdminPage() {
                                   className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                                 >
                                   Introduced
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(bill.id, "Assigned")}
+                                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                                >
+                                  Assigned
                                 </button>
                                 <button
                                   onClick={() => handleStatusChange(bill.id, "In Committee")}
