@@ -98,14 +98,19 @@ export default function Home() {
     return daysSinceCreated <= 6;
   };
 
+  // Helper to normalize bill number for comparison (remove spaces)
+  const normalizeBillNumber = (bn: string): string => bn.replace(/\s+/g, '').toUpperCase();
+
   // Helper function to sort bills with companion grouping
   const sortBillsWithCompanions = (billsToSort: Bill[]) => {
     // Helper to check if two bills are companions (bidirectional)
     const areCompanions = (bill1: Bill, bill2: Bill): boolean => {
-      return !!(
-        (bill1.companion_bills && bill1.companion_bills.includes(bill2.bill_number)) ||
-        (bill2.companion_bills && bill2.companion_bills.includes(bill1.bill_number))
-      );
+      const companions1 = bill1.companion_bills ? bill1.companion_bills.split(',').map(b => normalizeBillNumber(b.trim())) : [];
+      const companions2 = bill2.companion_bills ? bill2.companion_bills.split(',').map(b => normalizeBillNumber(b.trim())) : [];
+      const norm1 = normalizeBillNumber(bill1.bill_number);
+      const norm2 = normalizeBillNumber(bill2.bill_number);
+
+      return companions1.includes(norm2) || companions2.includes(norm1);
     };
 
     // Helper to get the sort key for a bill (used for grouping companions)
@@ -303,10 +308,12 @@ export default function Home() {
 
     // Helper to check if two bills are companions
     const areCompanions = (bill1: Bill, bill2: Bill): boolean => {
-      const companions1 = bill1.companion_bills ? bill1.companion_bills.split(',').map(b => b.trim()) : [];
-      const companions2 = bill2.companion_bills ? bill2.companion_bills.split(',').map(b => b.trim()) : [];
+      const companions1 = bill1.companion_bills ? bill1.companion_bills.split(',').map(b => normalizeBillNumber(b.trim())) : [];
+      const companions2 = bill2.companion_bills ? bill2.companion_bills.split(',').map(b => normalizeBillNumber(b.trim())) : [];
+      const norm1 = normalizeBillNumber(bill1.bill_number);
+      const norm2 = normalizeBillNumber(bill2.bill_number);
 
-      return companions1.includes(bill2.bill_number) || companions2.includes(bill1.bill_number);
+      return companions1.includes(norm2) || companions2.includes(norm1);
     };
 
     // Group bills by companion relationships
