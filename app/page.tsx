@@ -149,7 +149,7 @@ export default function Home() {
   };
 
   const registrationBills = sortBillsWithCompanions(
-    filteredBills.filter(bill => bill.position !== "Monitor" && bill.position !== "Archive" && !bill.is_archived && !bill.is_funnel)
+    filteredBills.filter(bill => (bill.is_pinned || (bill.position !== "Monitor" && bill.position !== "Archive")) && !bill.is_archived && !bill.is_funnel)
   );
 
   const monitoringBills = sortBillsWithCompanions(
