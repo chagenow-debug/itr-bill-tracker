@@ -315,6 +315,90 @@ export default function Home() {
               {Array.from(groupedBills.values()).map((group) => renderCompanionGroup(group))}
             </tbody>
           </table>
+          <div className="mobile-cards">
+            {Array.from(groupedBills.values()).map((groupBills) => {
+              const firstBill = groupBills[0];
+              const representativeId = firstBill.id;
+              const isExpanded = expanded.has(representativeId);
+              return (
+                <div
+                  key={`card-${firstBill.bill_number}`}
+                  className={`bill-card ${isExpanded ? "card-expanded" : ""}`}
+                  onClick={() => toggleDetail(representativeId)}
+                >
+                  <div className="card-header">
+                    <button
+                      className={`card-expand-btn ${isExpanded ? "active" : ""}`}
+                      aria-label="Expand bill details"
+                    >
+                      <svg width="8" height="10" viewBox="0 0 8 10" fill="currentColor">
+                        <path d="M1 0.5L7 5L1 9.5V0.5Z" />
+                      </svg>
+                    </button>
+                    <div className="card-body">
+                      <div className="card-top-row">
+                        <div className="card-bill-numbers">
+                          {groupBills.map((bill) => (
+                            <React.Fragment key={bill.id}>
+                              <a href={bill.url || "#"} target="_blank" rel="noopener noreferrer" className="bill-link" onClick={(e) => e.stopPropagation()}>
+                                {bill.bill_number}
+                              </a>
+                              {bill.fiscal_note && (
+                                <a href={bill.fiscal_note} target="_blank" rel="noopener noreferrer" className="fiscal-link" onClick={(e) => e.stopPropagation()} title="Fiscal Note">$</a>
+                              )}
+                            </React.Fragment>
+                          ))}
+                          {isNewBill(firstBill.created_at) && <span className="badge-new">NEW</span>}
+                        </div>
+                        <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                          {groupBills.map((bill) => (
+                            <span key={bill.id} className={`position-badge ${getPositionClass(bill.position)}`}>
+                              {bill.position}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      {groupBills.some(b => b.previous_bill_number) && (
+                        <div style={{ marginBottom: '4px' }}>
+                          {groupBills.filter(b => b.previous_bill_number).map(b => (
+                            <div key={b.id} className="prev-bill">Prev: {b.previous_bill_number}</div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="card-title">{firstBill.subject}</div>
+                      <div className="card-meta">
+                        {groupBills.map((bill) => (
+                          <React.Fragment key={bill.id}>
+                            {bill.committee && <span className="tag tag-committee">{bill.committee}</span>}
+                            {bill.manager && <span className="tag tag-manager">{bill.manager}</span>}
+                            {bill.status && <span className="tag tag-status">{bill.status}</span>}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                      {isExpanded && (
+                        <div className="card-detail">
+                          {groupBills.map((bill, idx) => (
+                            <div key={bill.id} className={`detail-block ${idx < groupBills.length - 1 ? "detail-block-border" : ""}`}>
+                              <div className="detail-bill-label">{bill.bill_number}</div>
+                              <div className="detail-section">
+                                <h5>Description</h5>
+                                <p>{bill.description || "No description available"}</p>
+                              </div>
+                              <div className="detail-section" style={{ marginTop: '8px' }}>
+                                <h5>Bill Information</h5>
+                                <p><strong>Sponsor:</strong> {bill.sponsor || "Not specified"}</p>
+                                <p><strong>Chamber:</strong> {bill.chamber}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -854,6 +938,115 @@ export default function Home() {
           font-size: 0.95em;
         }
 
+        /* ═══ MOBILE CARD LAYOUT ═══ */
+        .mobile-cards { display: none; }
+
+        .bill-card {
+          background: var(--surface);
+          border-bottom: 1px solid var(--border-light);
+          padding: 14px 16px;
+          cursor: pointer;
+          transition: background 0.12s ease;
+        }
+
+        .bill-card:last-child { border-bottom: none; }
+
+        .bill-card:active {
+          background: #f8f9fb;
+        }
+
+        .bill-card.card-expanded {
+          background: var(--teal-light);
+        }
+
+        .card-header {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .card-expand-btn {
+          background: transparent;
+          border: none;
+          color: var(--text-muted);
+          cursor: pointer;
+          width: 20px;
+          height: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 4px;
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+          margin-top: 2px;
+        }
+
+        .card-expand-btn.active {
+          transform: rotate(90deg);
+          color: var(--blue);
+        }
+
+        .card-body {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .card-top-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          margin-bottom: 4px;
+        }
+
+        .card-bill-numbers {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          align-items: center;
+        }
+
+        .card-bill-numbers .bill-link {
+          font-size: 0.9em;
+        }
+
+        .card-bill-numbers .prev-bill {
+          font-size: 0.7em;
+        }
+
+        .card-title {
+          font-weight: 600;
+          color: var(--text-primary);
+          font-size: 0.9em;
+          line-height: 1.35;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .card-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          align-items: center;
+        }
+
+        .card-meta .tag { font-size: 0.72em; }
+        .card-meta .position-badge { font-size: 0.65em; }
+        .card-meta .fiscal-link { width: 22px; height: 22px; font-size: 0.75em; }
+
+        .card-detail {
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid var(--border);
+        }
+
+        .card-detail .detail-block { padding: 4px 0; }
+        .card-detail .detail-bill-label { font-size: 0.75em; margin-bottom: 8px; }
+        .card-detail .detail-section h5 { font-size: 0.62em; }
+        .card-detail .detail-section p { font-size: 0.85em; }
+
         /* ═══ RESPONSIVE: 1024 ═══ */
         @media (max-width: 1024px) {
           .container { padding: 20px; }
@@ -867,7 +1060,7 @@ export default function Home() {
           .bills-table td:nth-child(8), .bills-table th:nth-child(8) { width: 95px; }
         }
 
-        /* ═══ RESPONSIVE: 768 ═══ */
+        /* ═══ RESPONSIVE: 768 — Switch to cards ═══ */
         @media (max-width: 768px) {
           .header-inner { flex-direction: column; padding: 0 16px; }
           .header-left { padding: 14px 0 8px; gap: 12px; justify-content: center; }
@@ -877,24 +1070,14 @@ export default function Home() {
           .container { padding: 14px; }
           .filters { flex-direction: column; padding: 14px; }
           .filter-group { width: 100%; }
-          .filter-group select, .filter-group input { width: 100%; }
-          .admin-btn { margin-left: 0; width: 100%; text-align: center; display: block; }
-          .bills-table { font-size: 0.78em; }
-          .bills-table th { padding: 8px 6px; font-size: 0.64em; }
-          .bills-table td { padding: 8px 6px; }
-          .expand-col { width: 26px; }
-          .bill-number-col { width: 54px; font-size: 0.82em; }
-          .title-col { width: 135px; }
-          .bills-table td:nth-child(4), .bills-table th:nth-child(4) { width: 44px; }
-          .bills-table td:nth-child(5), .bills-table th:nth-child(5) { width: 58px; }
-          .bills-table td:nth-child(6), .bills-table th:nth-child(6) { width: 52px; }
-          .bills-table td:nth-child(7), .bills-table th:nth-child(7) { width: 105px; }
-          .bills-table td:nth-child(8), .bills-table th:nth-child(8) { width: 72px; }
-          .position-badge { font-size: 0.6em; padding: 2px 6px; }
-          .tag { font-size: 0.7em; padding: 2px 4px; }
-          .bill-title { font-size: 0.85em; }
+          .filter-group select, .filter-group input { width: 100%; min-width: unset; }
+          .admin-btn { margin-left: 0; width: 100%; text-align: center; display: block; padding: 12px 22px; }
           .section-label { padding: 12px 16px; }
           .section-label-text { font-size: 0.78em; }
+
+          /* Hide table, show cards */
+          .table-wrap .bills-table { display: none; }
+          .mobile-cards { display: block; }
         }
 
         /* ═══ RESPONSIVE: 480 ═══ */
@@ -904,24 +1087,13 @@ export default function Home() {
           .header h1 { font-size: 1.05em; }
           .session-badge { font-size: 0.72em; }
           .filters { padding: 12px; gap: 10px; }
-          .filter-group select, .filter-group input { min-width: unset; }
           .container { padding: 10px; }
-          .bills-table th { white-space: normal; }
-          .bills-table td { vertical-align: middle; }
-          .expand-col { width: 24px; }
-          .bill-number-col { width: 48px; font-size: 0.8em; }
-          .title-col { width: auto; }
-          .fiscal-col { width: 34px; }
-          .bills-table td:nth-child(5), .bills-table th:nth-child(5) { width: 50px; }
-          .bills-table td:nth-child(6), .bills-table th:nth-child(6) { width: 46px; }
-          .bills-table td:nth-child(7), .bills-table th:nth-child(7) { display: none; }
-          .bills-table td:nth-child(8), .bills-table th:nth-child(8) { width: 58px; }
-          .position-badge { font-size: 0.58em; padding: 2px 4px; }
-          .tag { font-size: 0.68em; padding: 1px 4px; }
-          .bill-title { font-size: 0.82em; }
           .section-label { border-radius: 8px 8px 0 0; padding: 10px 14px; }
           .table-wrap { border-radius: 0 0 8px 8px; }
-          .detail-grid { grid-template-columns: 1fr; gap: 14px; }
+          .bill-card { padding: 12px 14px; }
+          .card-title { font-size: 0.85em; }
+          .card-meta .tag { font-size: 0.68em; }
+          .card-meta .position-badge { font-size: 0.6em; }
         }
       `}</style>
 
